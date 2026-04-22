@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sigma Games — Play & Win</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <!-- NAV -->
+    <nav>
+      <div class="nav-logo">
+        <img src="./assets/Logo.svg" alt="Sigma Games" class="nav-logo-img" />
+      </div>
+    </nav>
+
+    <!-- ===== HOME ===== -->
+    <div class="screen active" id="home">
+      <div class="hero animate-in">
+        <h1>PLAY GAMES.<br /><em>WIN CASH.</em></h1>
+        <p class="hero-sub">
+          Compete in skill-based games and climb the leaderboard. Top 30 players
+          win real prizes.
+        </p>
+        <div class="prize-stack">
+          <div
+            class="prize-banner"
+            onclick="
+              document
+                .getElementById('games-section')
+                .scrollIntoView({ behavior: 'smooth' })
+            "
+          >
+            <div class="prize-banner-icon">
+              <img src="./assets/prize-pool.svg" alt="Prize Pool" />
+            </div>
+            <div class="prize-banner-content">
+              <div class="prize-banner-label">PRIZE POOL</div>
+              <div class="prize-banner-amount">$500</div>
+            </div>
+            <div class="prize-banner-divider"></div>
+            <div class="prize-banner-slots">
+              <div class="prize-slot">
+                <span class="prize-slot-rank"
+                  ><img
+                    src="./assets/1st.svg"
+                    alt="1st"
+                    class="prize-rank-svg"
+                  />
+                  1st</span
+                >
+                <span class="prize-slot-val">$150</span>
+              </div>
+              <div class="prize-slot">
+                <span class="prize-slot-rank"
+                  ><img
+                    src="./assets/2nd.svg"
+                    alt="2nd"
+                    class="prize-rank-svg"
+                  />
+                  2nd</span
+                >
+                <span class="prize-slot-val">$100</span>
+              </div>
+              <div class="prize-slot">
+                <span class="prize-slot-rank"
+                  ><img
+                    src="./assets/3rd.svg"
+                    alt="3rd"
+                    class="prize-rank-svg"
+                  />
+                  3rd</span
+                >
+                <span class="prize-slot-val">$75</span>
+              </div>
+            </div>
+          </div>
+          <div class="hero-countdown">
+            <div class="hero-countdown-top">
+              <div class="pulse-dot"></div>
+              <span class="countdown-label">ENDS IN</span>
+            </div>
+            <span class="countdown-timer" id="hero-countdown-timer"
+              >--:--:--</span
+            >
+          </div>
+        </div>
+        <div class="hero-scroll-indicator">
+          <span class="hero-scroll-label">SCROLL</span>
+          <div class="hero-scroll-arrow">
+            <svg
+              width="16"
+              height="20"
+              viewBox="0 0 16 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <line
+                x1="8"
+                y1="0"
+                x2="8"
+                y2="16"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <polyline
+                points="2,11 8,18 14,11"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="games-label" id="games-section" style="text-align: center">
+        PICK YOUR GAME
+      </div>
+      <div class="games-grid animate-in delay-1">
+        <div class="game-card card-teal" onclick="selectGame('reflex')">
+          <div class="game-card-art">
+            <img src="./assets/Sugar rush.jpg" alt="Sugar Rush" />
+          </div>
+          <div class="game-card-body">
+            <div class="game-tag">Strategy · Speed</div>
+            <h3>SUGAR RUSH</h3>
+            <p>
+              Swap candies, trigger cascades, and rack up a higher score before
+              time runs out.
+            </p>
+            <div class="game-card-footer">
+              <div class="players-live">
+                <span class="pulse-dot"></span> 47 playing
+              </div>
+              <button class="btn-play"><span>PLAY</span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="game-card card-purple" onclick="selectGame('memory')">
+          <div class="game-card-art">
+            <img src="./assets/Solo shooter.jpg" alt="Solo Shooter" />
+          </div>
+          <div class="game-card-body">
+            <div class="game-tag">Shooter · Endurance</div>
+            <h3>SOLO SHOOTER</h3>
+            <p>Kill as many enemies as you can before time runs out.</p>
+            <div class="game-card-footer">
+              <div class="players-live">
+                <span class="pulse-dot"></span> 31 playing
+              </div>
+              <button class="btn-play"><span>PLAY</span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="game-card card-fire" onclick="selectGame('snake')">
+          <div class="game-card-art">
+            <img src="./assets/Railway Run.jpg" alt="Railway Run" />
+          </div>
+          <div class="game-card-body">
+            <div class="game-tag">Runner · Skill</div>
+            <h3>RAILWAY RUN</h3>
+            <p>
+              Dodge obstacles and outpace your rivals for the top spot on the
+              leaderboard.
+            </p>
+            <div class="game-card-footer">
+              <div class="players-live">
+                <span class="pulse-dot"></span> 62 playing
+              </div>
+              <button class="btn-play"><span>PLAY</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== HOME LEADERBOARD ===== -->
+      <div class="home-lb-section">
+        <div class="home-lb-header">
+          <div>
+            <div class="home-lb-eyebrow">TOP PLAYERS</div>
+            <h2 class="home-lb-title">LEADERBOARD</h2>
+          </div>
+          <div class="lb-tabs" id="home-lb-tabs">
+            <button class="lb-tab active" onclick="filterHomeLB('all', this)">
+              All Games
+            </button>
+            <button class="lb-tab" onclick="filterHomeLB('reflex', this)">
+              Sugar Rush
+            </button>
+            <button class="lb-tab" onclick="filterHomeLB('memory', this)">
+              Solo Shooter
+            </button>
+            <button class="lb-tab" onclick="filterHomeLB('snake', this)">
+              Railway Run
+            </button>
+          </div>
+        </div>
+        <div class="lb-table">
+          <div class="lb-table-header">
+            <div>#</div>
+            <div>Player</div>
+            <div>Score</div>
+            <div>Game</div>
+            <div class="lb-prize-col">Prize</div>
+          </div>
+          <div id="home-lb-entries"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== GAME SELECT / MODE ===== -->
+    <div class="screen" id="game-select">
+      <div class="select-wrap">
+        <div class="select-top-bar">
+          <button class="back-btn" onclick="goHome()">← Back</button>
+          <div class="select-countdown">
+            <div class="pulse-dot"></div>
+            <span class="countdown-label">ENDS IN</span>
+            <span class="countdown-timer" id="select-countdown-timer"
+              >--:--:--</span
+            >
+          </div>
+        </div>
+        <div class="select-game-art" id="select-art"></div>
+        <div class="select-game-tag" id="select-tag"></div>
+        <h2 id="select-title"></h2>
+        <p id="select-desc"></p>
+
+        <div class="mode-cards">
+          <div class="mode-card tournament" onclick="startGame('tournament')">
+            <div class="mode-icon">
+              <img
+                src="./assets/tournament.svg"
+                alt="Tournament"
+                class="mode-icon-svg"
+              />
+            </div>
+            <h3>JOIN TOURNAMENT</h3>
+            <p>
+              Your score goes on the leaderboard. Top 30 players win prizes.
+            </p>
+            <span class="mode-tag">FREE ENTRY</span>
+          </div>
+          <div class="mode-card practice" onclick="startGame('practice')">
+            <div class="mode-icon">
+              <img
+                src="./assets/practice.svg"
+                alt="Practice"
+                class="mode-icon-svg"
+              />
+            </div>
+            <h3>PRACTICE</h3>
+            <p>Play without pressure. Get comfortable before you compete.</p>
+            <span class="mode-tag">NO STAKES</span>
+          </div>
+        </div>
+
+        <div class="leaderboard-peek">
+          <div class="peek-header">
+            <h4>Game Leaderboard</h4>
+            <div class="select-countdown">
+              <div class="pulse-dot"></div>
+              <span class="countdown-label">ENDS IN</span>
+              <span class="countdown-timer" id="peek-countdown-timer"
+                >--:--:--</span
+              >
+            </div>
+          </div>
+          <div id="lb-peek-rows"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== GAME SCREEN ===== -->
+    <div class="screen" id="game-screen">
+      <div class="game-header">
+        <div class="game-info">
+          <button class="back-btn" style="margin: 0" onclick="exitGame()">
+            ← Exit
+          </button>
+          <span class="game-name-small" id="game-name-label"></span>
+          <span class="mode-badge" id="mode-badge"></span>
+        </div>
+        <div class="game-stats">
+          <div class="stat-item">
+            <div class="stat-label">Score</div>
+            <div class="stat-val" id="live-score">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Time</div>
+            <div class="stat-val" id="live-time">30</div>
+          </div>
+        </div>
+      </div>
+      <div class="game-canvas-wrap">
+        <canvas id="gameCanvas" width="640" height="480"></canvas>
+      </div>
+      <div
+        style="
+          text-align: center;
+          padding: 12px 0;
+          color: var(--muted);
+          font-size: 13px;
+          font-family: var(--font-mono);
+        "
+        id="game-instructions"
+      ></div>
+    </div>
+
+    <!-- ===== LEADERBOARD SCREEN ===== -->
+    <div class="screen" id="leaderboard-screen">
+      <div class="lb-full-header">
+        <div>
+          <div
+            style="
+              font-family: var(--font-mono);
+              font-size: 11px;
+              letter-spacing: 3px;
+              text-transform: uppercase;
+              color: var(--muted);
+              margin-bottom: 8px;
+            "
+          >
+            TOP PLAYERS
+          </div>
+          <h2>LEADERBOARD</h2>
+        </div>
+        <div>
+          <div class="lb-tabs" id="lb-tabs">
+            <button class="lb-tab active" onclick="filterLB('all')">
+              All Games
+            </button>
+            <button class="lb-tab" onclick="filterLB('reflex')">
+              Sugar Rush
+            </button>
+            <button class="lb-tab" onclick="filterLB('memory')">
+              Solo Shooter
+            </button>
+            <button class="lb-tab" onclick="filterLB('snake')">
+              Railway Run
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="lb-table">
+        <div class="lb-table-header">
+          <div>#</div>
+          <div>Player</div>
+          <div>Score</div>
+          <div>Game</div>
+          <div class="lb-prize-col">Prize</div>
+        </div>
+        <div id="lb-entries"></div>
+      </div>
+      <div class="play-again-bar">
+        <button class="btn-primary" style="max-width: 240px" onclick="goHome()">
+          🎮 Play Another Game
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== RESULT OVERLAY ===== -->
+    <div class="overlay" id="result-overlay">
+      <div class="overlay-card" id="result-card">
+        <!-- dynamically filled -->
+      </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast" id="toast"></div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
