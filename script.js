@@ -80,7 +80,7 @@ const GAMES = {
     tag: "Strategy · Speed",
     art: "⚡",
     image: "./assets/Sugar rush.jpg",
-    video: "./assets/Railway Run.mp4",
+    video: "./assets/Sugar Rush.mp4",
     artBg: "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
     instructions: "CLICK the targets as fast as you can!",
     maxScore: 2000,
