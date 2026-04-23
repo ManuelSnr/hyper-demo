@@ -852,7 +852,7 @@ function renderSuccessCard() {
     </p>
     ${isLeaderboard ? '<button class="btn-primary" onclick="viewLeaderboard()">View Leaderboard</button>' : ""}
     <button class="btn-${isLeaderboard ? "secondary" : "primary"}" onclick="restartGame()">Play Again</button>
-    ${isLeaderboard ? "" : '<button class="btn-secondary" onclick="goHome()">Back to Games</button>'}
+    ${isLeaderboard ? "" : '<button class="btn-secondary" onclick="closeOverlay();goHome()">Back to Games</button>'}
   `;
 }
 
