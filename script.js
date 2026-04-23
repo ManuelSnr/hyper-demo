@@ -47,6 +47,32 @@ let captureStage = "result"; // result | form | success
 let leaderboardFilter = "all";
 let starRating = 0;
 
+// ===== PLAYER PROFILE (localStorage) =====
+const PROFILE_KEY = "hyper_player_profile";
+
+function getProfile() {
+  try {
+    return JSON.parse(localStorage.getItem(PROFILE_KEY)) || null;
+  } catch {
+    return null;
+  }
+}
+
+function saveProfile(data) {
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(data));
+}
+
+// Returns the player's existing entry for a given game, or null
+function getExistingEntry(game) {
+  const profile = getProfile();
+  if (!profile) return null;
+  return (
+    leaderboard.find(
+      (e) => e.isUser && e.game === game && e._profileId === profile.id,
+    ) || null
+  );
+}
+
 const GAMES = {
   reflex: {
     title: "SUGAR RUSH",
@@ -94,7 +120,22 @@ const seedData = [
   { name: "EmmaDelta", game: "reflex", score: 1650, avatar: "Avatar 7.png" },
   { name: "ZainabPro", game: "memory", score: 3980, avatar: "Avatar 8.png" },
 ];
-let leaderboard = [...seedData];
+
+const LB_KEY = "hyper_leaderboard";
+
+function loadLeaderboard() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LB_KEY));
+    if (Array.isArray(saved) && saved.length) return saved;
+  } catch {}
+  return [...seedData];
+}
+
+function persistLeaderboard() {
+  localStorage.setItem(LB_KEY, JSON.stringify(leaderboard));
+}
+
+let leaderboard = loadLeaderboard();
 
 // ===== NAVIGATION =====
 function showScreen(id) {
@@ -152,7 +193,7 @@ function renderLBPeek(gameId) {
     <div class="lb-row peek-row">
       <span class="lb-rank ${rankClasses[i]}">${rankIcons[i]}</span>
       <span class="peek-avatar">${getAvatar(r)}</span>
-      <span class="lb-name">${r.name}</span>
+      <span class="lb-name">${r.name}${r.isUser ? ' <span class="lb-you-tag">YOU</span>' : ""}</span>
       <span class="lb-score">${r.score.toLocaleString()}</span>
     </div>
   `,
@@ -669,22 +710,57 @@ function renderResultCard() {
 }
 
 function renderTournamentForm() {
+  const profile = getProfile();
+  const existing = profile ? getExistingEntry(currentGame) : null;
+  const higherExists = existing && existing.score >= finalScore;
+
+  // If we already know the player and their current score is not better, show a message
+  if (higherExists) {
+    document.getElementById("result-card").innerHTML = `
+      <span class="result-emoji">📊</span>
+      <div class="capture-title">BEAT YOUR BEST SCORE</div>
+      <p class="result-subtitle" style="margin-bottom:24px">
+        Your best score for this game is <strong style="color:var(--amber)">${existing.score.toLocaleString()}</strong>. Keep playing to beat it!<br>
+    
+      </p>
+      <button class="btn-primary" onclick="restartGame()">Play Again</button>
+      <button class="btn-secondary" onclick="viewLeaderboard()">View Leaderboard</button>
+    `;
+    return;
+  }
+
   document.getElementById("result-card").innerHTML = `
     <span class="result-emoji">🏆</span>
-    <div class="capture-title">SAVE YOUR SCORE</div>
-    <p class="capture-sub">Enter your details to claim your spot on the leaderboard and be eligible to win.</p>
+    <div class="capture-title">${existing ? "NEW BEST SCORE!" : "SAVE YOUR SCORE"}</div>
+    ${
+      existing
+        ? `
+      <div class="new-best-display">
+        <div class="new-best-label">YOUR NEW BEST</div>
+        <div class="new-best-score">${finalScore.toLocaleString()}</div>
+        <div class="new-best-prev">Previous best: <span>${existing.score.toLocaleString()}</span></div>
+      </div>
+    `
+        : `<p class="capture-sub">Enter your details to claim your spot on the leaderboard and be eligible to win.</p>`
+    }
+    ${
+      !existing
+        ? `
     <div class="form-field">
       <label>Display Name</label>
-      <input type="text" id="f-name" placeholder="How you'll appear on the board" maxlength="20">
+      <input type="text" id="f-name" placeholder="How you'll appear on the board" maxlength="20" value="${profile?.name || ""}">
     </div>
     <div class="form-field">
       <label>Phone Number</label>
-      <input type="tel" id="f-phone" placeholder="+234 000 000 0000">
+      <input type="tel" id="f-phone" placeholder="+234 000 000 0000" value="${profile?.phone || ""}">
     </div>
     <div class="form-field">
       <label>Email Address</label>
-      <input type="email" id="f-email" placeholder="winner@email.com">
+      <input type="email" id="f-email" placeholder="winner@email.com" value="${profile?.email || ""}">
     </div>
+    `
+        : ""
+    }
     <button class="btn-primary" onclick="submitScore()">Save My Score</button>
     <button class="btn-secondary" onclick="captureStage='result';renderResultCard()">Back</button>
   `;
@@ -779,33 +855,71 @@ function clearFieldErrors() {
 
 function submitScore() {
   clearFieldErrors();
-  const name = document.getElementById("f-name")?.value?.trim();
-  const phone = document.getElementById("f-phone")?.value?.trim();
 
-  let valid = true;
-  if (!name) {
-    setFieldError("f-name", "Display name is required");
-    valid = false;
+  // If returning player, form fields won't exist — pull from saved profile
+  let profile = getProfile();
+  const isReturning = !!profile && !!getExistingEntry(currentGame);
+
+  const name = isReturning
+    ? profile.name
+    : document.getElementById("f-name")?.value?.trim();
+  const phone = isReturning
+    ? profile.phone
+    : document.getElementById("f-phone")?.value?.trim();
+  const email = isReturning
+    ? profile.email
+    : document.getElementById("f-email")?.value?.trim();
+
+  if (!isReturning) {
+    let valid = true;
+    if (!name) {
+      setFieldError("f-name", "Display name is required");
+      valid = false;
+    }
+    if (!phone) {
+      setFieldError("f-phone", "Phone number is required");
+      valid = false;
+    }
+    if (!valid) return;
   }
-  if (!phone) {
-    setFieldError("f-phone", "Phone number is required");
-    valid = false;
+
+  // Save / update profile
+  if (!profile) {
+    profile = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+    };
   }
-  if (!valid) return;
+  profile.name = name;
+  profile.phone = phone;
+  if (email) profile.email = email;
+  saveProfile(profile);
 
   const avatarNums = [
     9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
     28, 29, 30,
   ];
-  const userAvatar = `Avatar ${avatarNums[Math.floor(Math.random() * avatarNums.length)]}.png`;
+  const userAvatar =
+    profile.avatar ||
+    `Avatar ${avatarNums[Math.floor(Math.random() * avatarNums.length)]}.png`;
+  profile.avatar = userAvatar;
+  saveProfile(profile);
+
+  // Remove any existing entry for this player + game, then add the new (better) one
+  const idx = leaderboard.findIndex(
+    (e) => e.isUser && e.game === currentGame && e._profileId === profile.id,
+  );
+  if (idx !== -1) leaderboard.splice(idx, 1);
+
   leaderboard.push({
     name,
     game: currentGame,
     score: finalScore,
     avatar: userAvatar,
     isUser: true,
+    _profileId: profile.id,
   });
   leaderboard.sort((a, b) => b.score - a.score);
+  persistLeaderboard();
 
   captureStage = "success";
   renderResultCard();
