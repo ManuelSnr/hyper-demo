@@ -54,6 +54,7 @@ const GAMES = {
     tag: "Strategy · Speed",
     art: "⚡",
     image: "./assets/Sugar rush.jpg",
+    video: "./assets/Railway Run.mp4",
     artBg: "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
     instructions: "CLICK the targets as fast as you can!",
     maxScore: 2000,
@@ -64,6 +65,7 @@ const GAMES = {
     tag: "Shooter · Endurance",
     art: "🧠",
     image: "./assets/Solo shooter.jpg",
+    video: "./assets/Solo Shooter.mp4",
     artBg: "linear-gradient(135deg, #1a0533, #3c1a5e, #6d28d9)",
     instructions: "CLICK cards to flip them — match all pairs!",
     maxScore: 5000,
@@ -74,6 +76,7 @@ const GAMES = {
     tag: "Runner · Skill",
     art: "🐍",
     image: "./assets/Railway Run.jpg",
+    video: "./assets/Railway Run.mp4",
     artBg: "linear-gradient(135deg, #1a0a00, #7c2d12, #dc2626)",
     instructions: "Arrow keys / WASD to move the snake",
     maxScore: 1500,
@@ -113,9 +116,13 @@ function selectGame(gameId) {
   currentGame = gameId;
   const g = GAMES[gameId];
 
-  // Hero image
+  // Hero video / image
   const art = document.getElementById("select-art");
-  art.innerHTML = `<img src="${g.image}" alt="${g.title}" />`;
+  if (g.video) {
+    art.innerHTML = `<video src="${g.video}" autoplay loop muted playsinline poster="${g.image}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit;"></video>`;
+  } else {
+    art.innerHTML = `<img src="${g.image}" alt="${g.title}" />`;
+  }
 
   // Title, tag, desc
   document.getElementById("select-title").textContent = g.title;
