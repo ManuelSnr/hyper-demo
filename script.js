@@ -74,7 +74,7 @@ function getExistingEntry(game) {
 }
 
 const GAMES = {
-  reflex: {
+  sugarrush: {
     title: "SUGAR RUSH",
     desc: "Swap candies, trigger cascades, and rack up a higher score before time runs out.",
     tag: "Strategy · Speed",
@@ -85,7 +85,7 @@ const GAMES = {
     instructions: "CLICK the targets as fast as you can!",
     maxScore: 2000,
   },
-  memory: {
+  soloshooter: {
     title: "SOLO SHOOTER",
     desc: "Kill as many enemies as you can before time runs out.",
     tag: "Shooter · Endurance",
@@ -96,7 +96,7 @@ const GAMES = {
     instructions: "CLICK cards to flip them — match all pairs!",
     maxScore: 5000,
   },
-  snake: {
+  railwayrun: {
     title: "RAILWAY RUN",
     desc: "Dodge obstacles and outpace your rivals for the top spot on the leaderboard.",
     tag: "Runner · Skill",
@@ -111,22 +111,49 @@ const GAMES = {
 
 // Fake leaderboard seed data
 const seedData = [
-  { name: "AdekunleG", game: "reflex", score: 1840, avatar: "Avatar 1.png" },
-  { name: "PraiseOlu", game: "snake", score: 1320, avatar: "Avatar 2.png" },
-  { name: "TobiWale", game: "memory", score: 4600, avatar: "Avatar 3.png" },
-  { name: "ChiDiva", game: "reflex", score: 1720, avatar: "Avatar 4.png" },
-  { name: "SuleGee", game: "snake", score: 1190, avatar: "Avatar 5.png" },
-  { name: "BusayoX", game: "memory", score: 4320, avatar: "Avatar 6.png" },
-  { name: "EmmaDelta", game: "reflex", score: 1650, avatar: "Avatar 7.png" },
-  { name: "ZainabPro", game: "memory", score: 3980, avatar: "Avatar 8.png" },
+  { name: "AdekunleG", game: "sugarrush", score: 1840, avatar: "Avatar 1.png" },
+  {
+    name: "PraiseOlu",
+    game: "railwayrun",
+    score: 1320,
+    avatar: "Avatar 2.png",
+  },
+  {
+    name: "TobiWale",
+    game: "soloshooter",
+    score: 4600,
+    avatar: "Avatar 3.png",
+  },
+  { name: "ChiDiva", game: "sugarrush", score: 1720, avatar: "Avatar 4.png" },
+  { name: "SuleGee", game: "railwayrun", score: 1190, avatar: "Avatar 5.png" },
+  { name: "BusayoX", game: "soloshooter", score: 4320, avatar: "Avatar 6.png" },
+  { name: "EmmaDelta", game: "sugarrush", score: 1650, avatar: "Avatar 7.png" },
+  {
+    name: "ZainabPro",
+    game: "soloshooter",
+    score: 3980,
+    avatar: "Avatar 8.png",
+  },
 ];
 
 const LB_KEY = "hyper_leaderboard";
 
+const GAME_ID_MIGRATION = {
+  reflex: "sugarrush",
+  memory: "soloshooter",
+  snake: "railwayrun",
+};
+
 function loadLeaderboard() {
   try {
     const saved = JSON.parse(localStorage.getItem(LB_KEY));
-    if (Array.isArray(saved) && saved.length) return saved;
+    if (Array.isArray(saved) && saved.length) {
+      // Migrate any legacy game IDs
+      return saved.map((e) => ({
+        ...e,
+        game: GAME_ID_MIGRATION[e.game] || e.game,
+      }));
+    }
   } catch {}
   return [...seedData];
 }
@@ -229,9 +256,9 @@ function initGame(gameId) {
   document.getElementById("live-score").textContent = "0";
   gameActive = true;
 
-  if (gameId === "reflex") initReflex();
-  else if (gameId === "memory") initMemory();
-  else if (gameId === "snake") initSnake();
+  if (gameId === "sugarrush") initReflex();
+  else if (gameId === "soloshooter") initMemory();
+  else if (gameId === "railwayrun") initSnake();
 }
 
 function stopGame() {
@@ -1046,9 +1073,9 @@ function renderLeaderboard() {
   const cont = document.getElementById("lb-entries");
   if (!cont) return;
   const gameName = {
-    reflex: "Sugar Rush",
-    memory: "Solo Shooter",
-    snake: "Railway Run",
+    sugarrush: "Sugar Rush",
+    soloshooter: "Solo Shooter",
+    railwayrun: "Railway Run",
   };
   cont.innerHTML = buildLBRows(filtered, gameName);
 }
@@ -1082,9 +1109,9 @@ function renderHomeLeaderboard() {
   const cont = document.getElementById("home-lb-entries");
   if (!cont) return;
   const gameName = {
-    reflex: "Sugar Rush",
-    memory: "Solo Shooter",
-    snake: "Railway Run",
+    sugarrush: "Sugar Rush",
+    soloshooter: "Solo Shooter",
+    railwayrun: "Railway Run",
   };
   cont.innerHTML = buildLBRows(filtered, gameName);
 }
