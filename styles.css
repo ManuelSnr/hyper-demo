@@ -468,11 +468,13 @@ nav {
 .prize-slot-rank {
   color: var(--muted);
   letter-spacing: 1px;
+  font-family: var(--font-mono);
 }
 .prize-slot-val {
   color: var(--amber);
   font-weight: 700;
   font-size: 13px;
+  font-family: var(--font-mono);
 }
 @keyframes shineSlide {
   0% {
@@ -2380,6 +2382,9 @@ nav {
   border: 1px solid var(--amber-dim);
   border-radius: 8px;
   padding: 5px 10px;
+  font-family: var(--font-mono);
+  color: var(--amber);
+  font-weight: 600;
 }
 .select-prize-rank-svg {
   width: 20px;
