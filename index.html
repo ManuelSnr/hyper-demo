@@ -180,10 +180,11 @@
               time runs out.
             </p>
             <div class="game-card-footer">
-              <div class="players-live">
-                <span class="pulse-dot"></span> <span id="gameplay-count-sugarrush">0</span> gameplays
-              </div>
               <button class="btn-play"><span>PLAY</span></button>
+              <div class="players-live">
+                <span class="pulse-dot"></span>
+                <span id="gameplay-count-sugarrush">0</span> gameplays
+              </div>
             </div>
           </div>
         </div>
@@ -197,10 +198,11 @@
             <h3>SOLO SHOOTER</h3>
             <p>Kill as many enemies as you can before time runs out.</p>
             <div class="game-card-footer">
-              <div class="players-live">
-                <span class="pulse-dot"></span> <span id="gameplay-count-soloshooter">0</span> gameplays
-              </div>
               <button class="btn-play"><span>PLAY</span></button>
+              <div class="players-live">
+                <span class="pulse-dot"></span>
+                <span id="gameplay-count-soloshooter">0</span> gameplays
+              </div>
             </div>
           </div>
         </div>
@@ -217,10 +219,11 @@
               leaderboard.
             </p>
             <div class="game-card-footer">
-              <div class="players-live">
-                <span class="pulse-dot"></span> <span id="gameplay-count-railwayrun">0</span> gameplays
-              </div>
               <button class="btn-play"><span>PLAY</span></button>
+              <div class="players-live">
+                <span class="pulse-dot"></span>
+                <span id="gameplay-count-railwayrun">0</span> gameplays
+              </div>
             </div>
           </div>
         </div>
@@ -272,7 +275,9 @@
           </div>
           <div class="terms-grid">
             <div class="terms-card">
-              <div class="terms-card-icon"><img src="./assets/eligible.svg" alt="Eligibility" /></div>
+              <div class="terms-card-icon">
+                <img src="./assets/eligible.svg" alt="Eligibility" />
+              </div>
               <h4>Eligibility</h4>
               <p>
                 Only official
@@ -283,7 +288,9 @@
               </p>
             </div>
             <div class="terms-card">
-              <div class="terms-card-icon"><img src="./assets/wallets.svg" alt="Bonus Wallet" /></div>
+              <div class="terms-card-icon">
+                <img src="./assets/wallets.svg" alt="Bonus Wallet" />
+              </div>
               <h4>Bonus Wallet</h4>
               <p>
                 Every participant starts with a
@@ -294,7 +301,9 @@
               </p>
             </div>
             <div class="terms-card">
-              <div class="terms-card-icon"><img src="./assets/payment.svg" alt="Payment Method" /></div>
+              <div class="terms-card-icon">
+                <img src="./assets/payment.svg" alt="Payment Method" />
+              </div>
               <h4>Payment Method</h4>
               <p>
                 All prizes will be paid exclusively in
@@ -305,7 +314,9 @@
               </p>
             </div>
             <div class="terms-card">
-              <div class="terms-card-icon"><img src="./assets/winning.svg" alt="Winning & Prizes" /></div>
+              <div class="terms-card-icon">
+                <img src="./assets/winning.svg" alt="Winning & Prizes" />
+              </div>
               <h4>Winning &amp; Prizes</h4>
               <p>
                 The <strong>top 20 players per game</strong> on the leaderboard
@@ -313,7 +324,9 @@
               </p>
             </div>
             <div class="terms-card">
-              <div class="terms-card-icon"><img src="./assets/deadline.svg" alt="Tournament Deadline" /></div>
+              <div class="terms-card-icon">
+                <img src="./assets/deadline.svg" alt="Tournament Deadline" />
+              </div>
               <h4>Tournament Deadline</h4>
               <p>
                 The tournament closes at
@@ -322,7 +335,9 @@
               </p>
             </div>
             <div class="terms-card">
-              <div class="terms-card-icon"><img src="./assets/privacy.svg" alt="Data & Privacy" /></div>
+              <div class="terms-card-icon">
+                <img src="./assets/privacy.svg" alt="Data & Privacy" />
+              </div>
               <h4>Data &amp; Privacy</h4>
               <p>
                 Your name, email, and score are collected solely to manage
@@ -617,8 +632,10 @@
           class="footer-tc-btn"
           onclick="
             goHome();
-            setTimeout(function(){
-              document.getElementById('terms-section').scrollIntoView({ behavior: 'smooth' });
+            setTimeout(function () {
+              document
+                .getElementById('terms-section')
+                .scrollIntoView({ behavior: 'smooth' });
             }, 100);
           "
         >

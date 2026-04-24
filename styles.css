@@ -1408,11 +1408,30 @@ canvas {
 
 /* --- Toast neon glow --- */
 .toast {
-  border-color: var(--amber-dim);
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--surface2);
+  border: 1px solid var(--amber-dim);
   box-shadow: 0 0 16px #f5a62330;
+  color: var(--text);
   font-family: var(--font-mono);
   font-size: 13px;
   letter-spacing: 0.5px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 99999;
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
+  white-space: nowrap;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 /* success */
@@ -1716,7 +1735,8 @@ canvas {
   height: 40px;
   object-fit: contain;
   display: block;
-  filter: drop-shadow(0 0 4px var(--amber)) drop-shadow(0 0 12px #f5a62360) drop-shadow(0 0 24px #f5a62328);
+  filter: drop-shadow(0 0 4px var(--amber)) drop-shadow(0 0 12px #f5a62360)
+    drop-shadow(0 0 24px #f5a62328);
 }
 .terms-card h4 {
   font-family: var(--font-display);
@@ -1817,7 +1837,7 @@ canvas {
     padding: 12px 24px;
   }
   .nav-logo-img {
-    height: 26px;
+    height: 32px;
   }
   .wallet-nav-label {
     display: none;
