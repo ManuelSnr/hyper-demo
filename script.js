@@ -169,26 +169,6 @@ function saveProfile(data) {
   localStorage.setItem(PROFILE_KEY, JSON.stringify(data));
 }
 
-// ---- Gameplay counters ----
-function getGameplayCount(game) {
-  return parseInt(localStorage.getItem("gameplay_count_" + game) || "0", 10);
-}
-function incrementGameplayCount(game) {
-  const next = getGameplayCount(game) + 1;
-  localStorage.setItem("gameplay_count_" + game, next);
-  return next;
-}
-function updateGameplayCountUI() {
-  ["sugarrush", "soloshooter", "railwayrun"].forEach((game) => {
-    const el = document.getElementById("gameplay-count-" + game);
-    if (!el) return;
-    const count = getGameplayCount(game);
-    const wrapper = el.closest(".players-live");
-    if (wrapper) wrapper.style.display = count > 0 ? "" : "none";
-    el.textContent = count;
-  });
-}
-
 // Returns the player's existing entry for a given game, or null
 function getExistingEntry(game) {
   const profile = getProfile();
