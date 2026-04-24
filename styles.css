@@ -696,8 +696,8 @@ nav {
 }
 /* --- PLAY button — arcade neon --- */
 .btn-play {
-  background: var(--amber);
-  color: #0d0d12;
+  background: transparent;
+  color: var(--amber);
   border: 1.5px solid var(--amber);
   border-radius: 6px;
   padding: 9px 20px;
@@ -727,25 +727,18 @@ nav {
   transition: transform 0.2s ease;
   z-index: 0;
 }
-.btn-play::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.15);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.2s ease;
-  z-index: 0;
-}
 .btn-play span {
   position: relative;
   z-index: 1;
-  color: #0d0d12;
 }
 .btn-play:hover {
+  color: #000;
   box-shadow:
     0 0 20px #f5a62380,
     inset 0 0 12px #f5a62320;
+}
+.btn-play:hover::before {
+  transform: scaleX(1);
 }
 .btn-play:active {
   transform: scale(0.95) translateY(2px);
@@ -2104,6 +2097,17 @@ canvas {
   }
 
   /* ===== T&C ===== */
+  .btn-play {
+    background: var(--amber);
+    color: #0d0d12;
+  }
+  .btn-play span {
+    color: #0d0d12;
+  }
+  .btn-play::before {
+    display: none;
+  }
+
   .terms-section {
     padding: 40px 0 32px;
     margin-left: 0;
