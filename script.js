@@ -1,12 +1,44 @@
+// ===== SPREADSHEET SYNC =====
+// Replace this URL with your published Google Apps Script Web App URL
+// Instructions: see README or ask your developer to deploy the Apps Script below.
+const SHEET_WEBHOOK_URL = ""; // <-- paste your Apps Script web app URL here
+
+/**
+ * Sends a row of data to Google Sheets via Apps Script web app.
+ * Each call saves a NEW row (duplicates across browsers are intentional).
+ * If SHEET_WEBHOOK_URL is empty, it silently skips.
+ */
+function saveToSheet(payload) {
+  if (!SHEET_WEBHOOK_URL) return;
+  const body = JSON.stringify({
+    ...payload,
+    timestamp: new Date().toISOString(),
+  });
+  fetch(SHEET_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" }, // avoid CORS preflight
+    body,
+  }).catch(() => {}); // fire-and-forget, never block UI
+}
+
+/**
+ * Checks whether this browser already submitted a form entry.
+ * We track submitted emails in localStorage to avoid re-asking on same browser.
+ */
+const SUBMITTED_EMAIL_KEY = "hyper_submitted_email";
+
+function getSubmittedEmail() {
+  return localStorage.getItem(SUBMITTED_EMAIL_KEY) || null;
+}
+
+function setSubmittedEmail(email) {
+  localStorage.setItem(SUBMITTED_EMAIL_KEY, email);
+}
+
 // ===== NAV COUNTDOWN =====
 (function () {
-  // Target: 48 hours from first load (persisted in sessionStorage)
-  const KEY = "sg_countdown_end";
-  let endTime = parseInt(sessionStorage.getItem(KEY));
-  if (!endTime || endTime < Date.now()) {
-    endTime = Date.now() + 48 * 60 * 60 * 1000;
-    sessionStorage.setItem(KEY, endTime);
-  }
+  // Fixed end: 5pm WAT (UTC+1) on Wednesday, May 6, 2026
+  const endTime = new Date("2026-05-06T16:00:00Z").getTime(); // 5pm WAT = 4pm UTC
 
   function pad(n) {
     return String(n).padStart(2, "0");
@@ -343,7 +375,7 @@ function showOutOfMoneyOverlay() {
     <div class="capture-title">OUT OF FUNDS</div>
     <p class="result-subtitle" style="margin-bottom:24px">
       <strong style="color:#ffffff">You need $${ENTRY_FEE} to enter this tournament.</strong><br>
-      Fill out our feedback form to receive an extra <br><strong style="color:var(--amber)">$25 bonus cash!</strong>
+      Fill out our feedback form to receive an extra <strong style="color:var(--amber)">$25 bonus cash!</strong>
     </p>
     <button class="btn-primary" onclick="document.getElementById('result-overlay').classList.remove('show');openFeedbackFormModal()">Get $25 Bonus Cash</button>
     <button class="btn-secondary" onclick="document.getElementById('result-overlay').classList.remove('show')">Close</button>
@@ -852,10 +884,11 @@ function renderResultCard() {
 
 function renderTournamentForm() {
   const profile = getProfile();
+  const submittedEmail = getSubmittedEmail();
   const existing = profile ? getExistingEntry(currentGame) : null;
   const higherExists = existing && existing.score >= finalScore;
 
-  // If we already know the player and their current score is not better, show a message
+  // If we already know the player (same browser) and their current score is not better, show a message
   if (higherExists) {
     document.getElementById("result-card").innerHTML = `
       <span class="result-emoji">📊</span>
@@ -890,6 +923,9 @@ function renderTournamentForm() {
     .map((c) => `<option value="${c.code}">${c.flag} ${c.code}</option>`)
     .join("");
 
+  // If same browser has submitted before (even for a different game), skip the form
+  const alreadyKnown = !!submittedEmail || !!profile?.email;
+
   document.getElementById("result-card").innerHTML = `
     <span class="result-emoji">🏆</span>
     <div class="capture-title">${existing ? "NEW BEST SCORE!" : "SAVE YOUR SCORE"}</div>
@@ -905,7 +941,7 @@ function renderTournamentForm() {
         : `<p class="capture-sub">Enter your details to claim your spot on the leaderboard and be eligible to win.</p>`
     }
     ${
-      !existing
+      !alreadyKnown
         ? `
     <div class="form-field">
       <label>Display Name</label>
@@ -920,10 +956,10 @@ function renderTournamentForm() {
     </div>
     <div class="form-field">
       <label>Work Email</label>
-      <input type="email" id="f-email" placeholder="Enter your work email" value="${profile?.email || ""}">
+      <input type="email" id="f-email" placeholder="Enter your work email" value="${profile?.email || submittedEmail || ""}">
     </div>
     `
-        : ""
+        : `<p class="capture-sub" style="color:var(--green)">✓ Your details are saved. We'll update your score on the leaderboard.</p>`
     }
     <button class="btn-primary" onclick="submitScore()">Save My Score</button>
     <button class="btn-secondary" onclick="captureStage='result';renderResultCard()">Back</button>
@@ -1188,22 +1224,26 @@ function clearFieldErrors() {
 function submitScore() {
   clearFieldErrors();
 
-  // If returning player, form fields won't exist — pull from saved profile
+  // If returning player on same browser, form fields won't exist — pull from saved profile
   let profile = getProfile();
-  const isReturning = !!profile && !!getExistingEntry(currentGame);
+  const submittedEmail = getSubmittedEmail();
+
+  // If same browser already has a submitted email, treat as returning player
+  const isReturning =
+    (!!profile && !!getExistingEntry(currentGame)) || !!submittedEmail;
 
   const name = isReturning
-    ? profile.name
+    ? profile?.name || ""
     : document.getElementById("f-name")?.value?.trim();
   const phoneCode = document.getElementById("f-phone-code")?.value || "";
   const phoneNum = document.getElementById("f-phone")?.value?.trim() || "";
   const phone = isReturning
-    ? profile.phone
+    ? profile?.phone || ""
     : phoneNum
       ? phoneCode + " " + phoneNum
       : "";
   const email = isReturning
-    ? profile.email
+    ? profile?.email || submittedEmail || ""
     : document.getElementById("f-email")?.value?.trim();
 
   if (!isReturning) {
@@ -1229,6 +1269,9 @@ function submitScore() {
   profile.phone = phone;
   if (email) profile.email = email;
   saveProfile(profile);
+
+  // Remember submitted email on this browser so we never re-ask
+  if (email) setSubmittedEmail(email);
 
   const avatarNums = [
     9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
@@ -1256,6 +1299,18 @@ function submitScore() {
   });
   leaderboard.sort((a, b) => b.score - a.score);
   persistLeaderboard();
+
+  // ---- Save to spreadsheet (every submission = new row) ----
+  saveToSheet({
+    name,
+    email,
+    phone,
+    game: currentGame,
+    gameTitle: GAMES[currentGame]?.title || currentGame,
+    score: finalScore,
+    mode: currentMode,
+    profileId: profile.id,
+  });
 
   captureStage = "success";
   renderResultCard();

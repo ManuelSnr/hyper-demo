@@ -86,8 +86,8 @@
             </div>
             <div class="prize-banner-content">
               <div class="prize-banner-label">PRIZE POOL</div>
-              <div class="prize-banner-amount">$500</div>
-              <div class="prize-banner-sub">PER GAME</div>
+              <div class="prize-banner-amount">$1,500</div>
+              <div class="prize-banner-sub">FOR 3 GAME</div>
             </div>
             <div class="prize-banner-divider"></div>
             <div class="prize-banner-slots">
@@ -181,7 +181,7 @@
             </p>
             <div class="game-card-footer">
               <div class="players-live">
-                <span class="pulse-dot"></span> 47 playing
+                <span class="pulse-dot"></span> <span id="gameplay-count-sugarrush">0</span> gameplays
               </div>
               <button class="btn-play"><span>PLAY</span></button>
             </div>
@@ -198,7 +198,7 @@
             <p>Kill as many enemies as you can before time runs out.</p>
             <div class="game-card-footer">
               <div class="players-live">
-                <span class="pulse-dot"></span> 31 playing
+                <span class="pulse-dot"></span> <span id="gameplay-count-soloshooter">0</span> gameplays
               </div>
               <button class="btn-play"><span>PLAY</span></button>
             </div>
@@ -218,7 +218,7 @@
             </p>
             <div class="game-card-footer">
               <div class="players-live">
-                <span class="pulse-dot"></span> 62 playing
+                <span class="pulse-dot"></span> <span id="gameplay-count-railwayrun">0</span> gameplays
               </div>
               <button class="btn-play"><span>PLAY</span></button>
             </div>
@@ -259,9 +259,88 @@
           <div id="home-lb-entries"></div>
         </div>
       </div>
-    </div>
 
-    <!-- ===== GAME SELECT / MODE ===== -->
+      <!-- ===== TERMS & CONDITIONS ===== -->
+      <div id="terms-section" class="terms-section">
+        <div class="terms-inner">
+          <div class="terms-header">
+            <span class="terms-badge">TERMS</span>
+            <h2 class="terms-title">RULES &amp; ELIGIBILITY</h2>
+            <p class="terms-subtitle">
+              Please read carefully before participating.
+            </p>
+          </div>
+          <div class="terms-grid">
+            <div class="terms-card">
+              <div class="terms-card-icon"><img src="./assets/eligible.svg" alt="Eligibility" /></div>
+              <h4>Eligibility</h4>
+              <p>
+                Only official
+                <strong>invitees to the iGaming Afrika Summit</strong> are
+                eligible to receive real cash prizes. An ID card or badge may be
+                requested to verify your attendance before any payout is
+                processed.
+              </p>
+            </div>
+            <div class="terms-card">
+              <div class="terms-card-icon"><img src="./assets/wallets.svg" alt="Bonus Wallet" /></div>
+              <h4>Bonus Wallet</h4>
+              <p>
+                Every participant starts with a
+                <strong>bonus $25</strong> wallet, with an extra $25 available
+                after completing the feedback form. Bonus can be used to enter
+                tournaments. Bonus funds <em>cannot</em> be withdrawn, only
+                players who appear on the leaderboard can win real cash prizes.
+              </p>
+            </div>
+            <div class="terms-card">
+              <div class="terms-card-icon"><img src="./assets/payment.svg" alt="Payment Method" /></div>
+              <h4>Payment Method</h4>
+              <p>
+                All prizes will be paid exclusively in
+                <strong>USDT on the BEP-20 network</strong> (Binance Smart
+                Chain). After the tournament ends, winners will receive an
+                <strong>email</strong> requesting their crypto wallet addressfor
+                payout.
+              </p>
+            </div>
+            <div class="terms-card">
+              <div class="terms-card-icon"><img src="./assets/winning.svg" alt="Winning & Prizes" /></div>
+              <h4>Winning &amp; Prizes</h4>
+              <p>
+                The <strong>top 20 players per game</strong> on the leaderboard
+                at the close of the tournament win real cash.
+              </p>
+            </div>
+            <div class="terms-card">
+              <div class="terms-card-icon"><img src="./assets/deadline.svg" alt="Tournament Deadline" /></div>
+              <h4>Tournament Deadline</h4>
+              <p>
+                The tournament closes at
+                <strong>5:00 PM on Wednesday, 6th May 2026</strong>. Scores
+                submitted after this time will not be counted.
+              </p>
+            </div>
+            <div class="terms-card">
+              <div class="terms-card-icon"><img src="./assets/privacy.svg" alt="Data & Privacy" /></div>
+              <h4>Data &amp; Privacy</h4>
+              <p>
+                Your name, email, and score are collected solely to manage
+                leaderboard standings and process prize payments. Your data will
+                not be shared with third parties outside of payout processing.
+              </p>
+            </div>
+          </div>
+          <p class="terms-footer-note">
+            By playing in tournament mode, you agree to these terms. For
+            questions, speak to a Metaverse Magna representative at
+            <strong>Booth E02</strong>.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- /#home -->
+
     <div class="screen" id="game-select">
       <div class="select-wrap">
         <div class="select-top-bar">
@@ -521,6 +600,32 @@
 
     <!-- ===== TOAST ===== -->
     <div class="toast" id="toast"></div>
+
+    <!-- ===== SITE FOOTER ===== -->
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <img
+          src="./assets/Logo.svg"
+          alt="Metaverse Magna"
+          class="footer-logo"
+        />
+        <p class="footer-copy">
+          © 2026 Metaverse Magna. All rights reserved. Prizes paid in
+          USDT-BEP20.
+        </p>
+        <button
+          class="footer-tc-btn"
+          onclick="
+            goHome();
+            setTimeout(function(){
+              document.getElementById('terms-section').scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          "
+        >
+          Terms &amp; Conditions
+        </button>
+      </div>
+    </footer>
 
     <script src="./script.js"></script>
   </body>
