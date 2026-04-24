@@ -97,6 +97,8 @@ let gameActive = false;
 let captureStage = "result"; // result | form | success
 let leaderboardFilter = "sugarrush";
 let starRating = 0;
+let feedbackStep = 1; // 1 = opinions, 2 = contact
+let feedbackStep1Data = {}; // temp store step 1 values
 
 // ===== PLAYER PROFILE (localStorage) =====
 const PROFILE_KEY = "hyper_player_profile";
@@ -306,11 +308,11 @@ function showOutOfMoneyOverlay() {
     <span class="result-emoji">💸</span>
     <div class="capture-title">OUT OF FUNDS</div>
     <p class="result-subtitle" style="margin-bottom:24px">
-      You need $${ENTRY_FEE} to enter a tournament but your wallet is empty.<br>
-      Fill out our feedback form to receive an extra <strong style="color:var(--amber)">$25 bonus cash!</strong>
+      You need $${ENTRY_FEE} to enter this tournament.<br>
+      Fill out our feedback form to receive an extra <br><strong style="color:var(--amber)">$25 bonus cash!</strong>
     </p>
-    <button class="btn-primary" onclick="closeOverlay();openFeedbackFormModal()">🎁 Get $25 Bonus Cash</button>
-    <button class="btn-secondary" onclick="closeOverlay()">Back</button>
+    <button class="btn-primary" onclick="closeOverlay();openFeedbackFormModal()">Get $25 Bonus Cash</button>
+    <button class="btn-secondary" onclick="document.getElementById('result-overlay').classList.remove('show')">Back</button>
   `;
   document.getElementById("result-overlay").classList.add("show");
 }
@@ -851,10 +853,7 @@ function renderTournamentForm() {
     { code: "+61", flag: "🇦🇺", name: "AU" },
     { code: "+81", flag: "🇯🇵", name: "JP" },
   ]
-    .map(
-      (c) =>
-        `<option value="${c.code}">${c.flag} ${c.name} (${c.code})</option>`,
-    )
+    .map((c) => `<option value="${c.code}">${c.flag} ${c.code}</option>`)
     .join("");
 
   document.getElementById("result-card").innerHTML = `
@@ -879,7 +878,7 @@ function renderTournamentForm() {
       <input type="text" id="f-name" placeholder="How you'll appear on the board" maxlength="20" value="${profile?.name || ""}">
     </div>
     <div class="form-field">
-      <label>Phone Number <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+      <label>Phone Number</label>
       <div class="phone-field-wrap">
         <select id="f-phone-code" class="phone-code-select">${countryCodes}</select>
         <input type="tel" id="f-phone" placeholder="000 000 0000" value="${profile?.phone || ""}">
@@ -897,36 +896,15 @@ function renderTournamentForm() {
   `;
 }
 
-function feedbackFormHTML(onSubmit, onBack) {
-  const countryCodes = [
-    { code: "+1", flag: "🇺🇸", name: "US" },
-    { code: "+44", flag: "🇬🇧", name: "UK" },
-    { code: "+234", flag: "🇳🇬", name: "NG" },
-    { code: "+27", flag: "🇿🇦", name: "ZA" },
-    { code: "+254", flag: "🇰🇪", name: "KE" },
-    { code: "+233", flag: "🇬🇭", name: "GH" },
-    { code: "+49", flag: "🇩🇪", name: "DE" },
-    { code: "+33", flag: "🇫🇷", name: "FR" },
-    { code: "+971", flag: "🇦🇪", name: "AE" },
-    { code: "+91", flag: "🇮🇳", name: "IN" },
-    { code: "+86", flag: "🇨🇳", name: "CN" },
-    { code: "+55", flag: "🇧🇷", name: "BR" },
-    { code: "+52", flag: "🇲🇽", name: "MX" },
-    { code: "+61", flag: "🇦🇺", name: "AU" },
-    { code: "+81", flag: "🇯🇵", name: "JP" },
-  ]
-    .map(
-      (c) =>
-        `<option value="${c.code}">${c.flag} ${c.name} (${c.code})</option>`,
-    )
-    .join("");
-
+// ---- FEEDBACK STEP 1: Opinions ----
+function feedbackStep1HTML(onNext, onBack) {
   return `
     <span class="result-emoji">💬</span>
     <div class="capture-title">QUICK FEEDBACK</div>
+    <div class="feedback-steps-indicator"><span class="step-dot active"></span><span class="step-dot"></span></div>
     <p class="capture-sub">What do you think about skill gaming? Your opinion helps us build something great.</p>
     <div class="form-field">
-      <label>How fun was that?</label>
+      <label>How was your experience?</label>
       <div class="star-rating" id="stars">
         ${[1, 2, 3, 4, 5].map((n) => `<span class="star" onclick="setStar(${n})">★</span>`).join("")}
       </div>
@@ -953,9 +931,41 @@ function feedbackFormHTML(onSubmit, onBack) {
       </select>
     </div>
     <div class="form-field">
-      <label>Your thoughts (optional)</label>
+      <label>Your thoughts</label>
       <textarea id="f-thoughts" placeholder="What did you enjoy? What could be better?"></textarea>
     </div>
+    <button class="btn-primary" onclick="${onNext}">Next →</button>
+    <button class="btn-secondary" onclick="${onBack}">Back</button>
+  `;
+}
+
+// ---- FEEDBACK STEP 2: Contact ----
+function feedbackStep2HTML(onSubmit, onBack) {
+  const countryCodes = [
+    { code: "+1", flag: "🇺🇸" },
+    { code: "+44", flag: "🇬🇧" },
+    { code: "+234", flag: "🇳🇬" },
+    { code: "+27", flag: "🇿🇦" },
+    { code: "+254", flag: "🇰🇪" },
+    { code: "+233", flag: "🇬🇭" },
+    { code: "+49", flag: "🇩🇪" },
+    { code: "+33", flag: "🇫🇷" },
+    { code: "+971", flag: "🇦🇪" },
+    { code: "+91", flag: "🇮🇳" },
+    { code: "+86", flag: "🇨🇳" },
+    { code: "+55", flag: "🇧🇷" },
+    { code: "+52", flag: "🇲🇽" },
+    { code: "+61", flag: "🇦🇺" },
+    { code: "+81", flag: "🇯🇵" },
+  ]
+    .map((c) => `<option value="${c.code}">${c.flag} ${c.code}</option>`)
+    .join("");
+
+  return `
+    <span class="result-emoji">👤</span>
+    <div class="capture-title">SUBMIT FEEDBACK</div>
+    <div class="feedback-steps-indicator"><span class="step-dot"></span><span class="step-dot active"></span></div>
+    <p class="capture-sub">Just a few details so we can keep you in the loop.</p>
     <div class="form-field">
       <label>Name</label>
       <input type="text" id="f-name" placeholder="How should we call you?">
@@ -977,26 +987,93 @@ function feedbackFormHTML(onSubmit, onBack) {
 }
 
 function renderFeedbackForm() {
-  document.getElementById("result-card").innerHTML = feedbackFormHTML(
-    "submitFeedback()",
+  feedbackStep = 1;
+  starRating = 0;
+  feedbackStep1Data = {};
+  document.getElementById("result-card").innerHTML = feedbackStep1HTML(
+    "feedbackNextStep('result-card', 'submitFeedback()', 'captureStage=\\'result\\';renderResultCard()')",
     "captureStage='result';renderResultCard()",
   );
 }
 
 function renderStandaloneFeedbackForm() {
+  feedbackStep = 1;
+  starRating = 0;
+  feedbackStep1Data = {};
   const cont = document.getElementById("feedback-modal-content");
-  cont.innerHTML = feedbackFormHTML(
-    "submitStandaloneFeedback()",
+  cont.innerHTML = feedbackStep1HTML(
+    "feedbackNextStep('feedback-modal-content', 'submitStandaloneFeedback()', 'renderStandaloneFeedbackForm()')",
     "closeFeedbackModal()",
   );
+}
+
+// Validate step 1, save data, render step 2
+function feedbackNextStep(containerId, onSubmit, onBack) {
+  clearFieldErrors();
+  const intent = document.getElementById("f-intent")?.value?.trim();
+  const companyType = document.getElementById("f-company-type")?.value?.trim();
+  let valid = true;
+
+  if (!starRating) {
+    const starsEl = document.getElementById("stars");
+    if (starsEl) {
+      let err = starsEl.parentElement.querySelector(".field-error");
+      if (!err) {
+        err = document.createElement("div");
+        err.className = "field-error";
+        starsEl.parentElement.appendChild(err);
+      }
+      err.textContent = "Please rate your experience";
+    }
+    valid = false;
+  }
+  if (!intent) {
+    setFieldError("f-intent", "Please select an option");
+    valid = false;
+  }
+  if (!companyType) {
+    setFieldError("f-company-type", "Please select your company type");
+    valid = false;
+  }
+  if (!valid) return;
+
+  feedbackStep1Data = {
+    starRating,
+    intent,
+    companyType,
+    thoughts: document.getElementById("f-thoughts")?.value?.trim() || "",
+  };
+
+  const cont = document.getElementById(containerId);
+  cont.innerHTML = feedbackStep2HTML(
+    onSubmit,
+    `feedbackGoBack('${containerId}', '${onSubmit}', '${onBack}')`,
+  );
+}
+
+function feedbackGoBack(containerId, onSubmit, onBack) {
+  // Re-render step 1, restoring saved values
+  const cont = document.getElementById(containerId);
+  cont.innerHTML = feedbackStep1HTML(
+    `feedbackNextStep('${containerId}', '${onSubmit}', '${onBack}')`,
+    onBack,
+  );
+  // Restore star rating
+  setStar(feedbackStep1Data.starRating || 0);
+  // Restore selects/textarea
+  if (feedbackStep1Data.intent)
+    document.getElementById("f-intent").value = feedbackStep1Data.intent;
+  if (feedbackStep1Data.companyType)
+    document.getElementById("f-company-type").value =
+      feedbackStep1Data.companyType;
+  if (feedbackStep1Data.thoughts)
+    document.getElementById("f-thoughts").value = feedbackStep1Data.thoughts;
 }
 
 function submitStandaloneFeedback() {
   clearFieldErrors();
   const name = document.getElementById("f-name")?.value?.trim();
   const email = document.getElementById("f-email")?.value?.trim();
-  const intent = document.getElementById("f-intent")?.value?.trim();
-  const companyType = document.getElementById("f-company-type")?.value?.trim();
 
   let valid = true;
   if (!name) {
@@ -1005,10 +1082,6 @@ function submitStandaloneFeedback() {
   }
   if (!email) {
     setFieldError("f-email", "Work email is required");
-    valid = false;
-  }
-  if (!intent) {
-    setFieldError("f-intent", "Please select an option");
     valid = false;
   }
   if (!valid) return;
@@ -1155,28 +1228,10 @@ function submitScore() {
 
 function submitFeedback() {
   clearFieldErrors();
-  const intent = document.getElementById("f-intent")?.value?.trim();
   const name = document.getElementById("f-name")?.value?.trim();
   const email = document.getElementById("f-email")?.value?.trim();
 
   let valid = true;
-  if (!starRating) {
-    const starsEl = document.getElementById("stars");
-    if (starsEl) {
-      let err = starsEl.parentElement.querySelector(".field-error");
-      if (!err) {
-        err = document.createElement("div");
-        err.className = "field-error";
-        starsEl.parentElement.appendChild(err);
-      }
-      err.textContent = "Please rate how fun the game was";
-    }
-    valid = false;
-  }
-  if (!intent) {
-    setFieldError("f-intent", "Please select an option");
-    valid = false;
-  }
   if (!name) {
     setFieldError("f-name", "Name is required");
     valid = false;

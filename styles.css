@@ -37,6 +37,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
+  font-size: 16px;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -461,9 +462,10 @@ nav {
 }
 .hero-scroll-indicator {
   position: absolute;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 180px;
+  right: 32px;
+  left: auto;
+  transform: none;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1277,6 +1279,22 @@ canvas {
 }
 
 /* form */
+.feedback-steps-indicator {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.step-dot {
+  width: 28px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 0.3s;
+}
+.step-dot.active {
+  background: var(--amber);
+}
 .capture-title {
   font-family: var(--font-display);
   font-size: 36px;
@@ -2150,15 +2168,16 @@ nav {
 .phone-field-wrap {
   display: flex;
   gap: 8px;
-  align-items: center;
+  align-items: stretch;
 }
 .phone-code-select {
   flex-shrink: 0;
-  width: 140px;
+  width: 90px;
+  max-width: 90px;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 10px 10px;
+  padding: 10px 4px;
   color: var(--text);
   font-family: var(--font-body);
   font-size: 13px;
@@ -2166,4 +2185,5 @@ nav {
 }
 .phone-field-wrap input {
   flex: 1;
+  min-width: 0;
 }
