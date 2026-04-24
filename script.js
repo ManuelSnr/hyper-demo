@@ -270,9 +270,9 @@ function renderLBPeek(gameId) {
     <div class="lb-row peek-row${isMe ? " peek-row-me" : ""}">
       <span class="lb-rank ${rankClasses[i]}">${rankIcons[i]}</span>
       <span class="peek-avatar">${getAvatar(r)}</span>
-      <span class="lb-name">${r.name}</span>
+      <span class="lb-name">${r.name}${isMe ? ' <span class="lb-me-badge">YOU</span>' : ""}</span>
       <span class="lb-score">${r.score.toLocaleString()}</span>
-      ${prize ? `<span class="lb-prize${i < 3 ? "" : ""}">${prize}</span>` : ""}
+      ${prize ? `<span class="lb-prize">${prize}</span>` : ""}
     </div>`;
         })
         .join("")
@@ -308,11 +308,11 @@ function showOutOfMoneyOverlay() {
     <span class="result-emoji">💸</span>
     <div class="capture-title">OUT OF FUNDS</div>
     <p class="result-subtitle" style="margin-bottom:24px">
-      You need $${ENTRY_FEE} to enter this tournament.<br>
+      <strong style="color:#ffffff">You need $${ENTRY_FEE} to enter this tournament.</strong><br>
       Fill out our feedback form to receive an extra <br><strong style="color:var(--amber)">$25 bonus cash!</strong>
     </p>
     <button class="btn-primary" onclick="closeOverlay();openFeedbackFormModal()">Get $25 Bonus Cash</button>
-    <button class="btn-secondary" onclick="document.getElementById('result-overlay').classList.remove('show')">Back</button>
+    <button class="btn-secondary" onclick="document.getElementById('result-overlay').classList.remove('show')">Close</button>
   `;
   document.getElementById("result-overlay").classList.add("show");
 }
