@@ -371,7 +371,7 @@ function showOutOfMoneyOverlay() {
       Check the leaderboard to see how you rank against other players.
     </p>
     <button class="btn-primary" onclick="document.getElementById('result-overlay').classList.remove('show');viewLeaderboardFromHome()">View Leaderboard</button>
-    <button class="btn-secondary" onclick="document.getElementById('result-overlay').classList.remove('show')">Close</button>
+    <button class="btn-secondary" onclick="document.getElementById('result-overlay').classList.remove('show');selectGame(currentGame)">Close</button>
   `
     : `
     <span class="result-emoji">💸</span>
@@ -381,7 +381,7 @@ function showOutOfMoneyOverlay() {
       Fill out our feedback form to receive an extra <strong style="color:var(--amber)">$25 bonus cash!</strong>
     </p>
     <button class="btn-primary" onclick="document.getElementById('result-overlay').classList.remove('show');openFeedbackFormModal()">Get $25 Bonus Cash</button>
-    <button class="btn-secondary" onclick="document.getElementById('result-overlay').classList.remove('show')">Close</button>
+    <button class="btn-secondary" onclick="document.getElementById('result-overlay').classList.remove('show');selectGame(currentGame)">Close</button>
   `;
   document.getElementById("result-overlay").classList.add("show");
 }
