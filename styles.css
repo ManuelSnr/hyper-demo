@@ -1025,9 +1025,11 @@ nav {
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--muted);
-  width: 28px;
+  width: 32px;
+  min-width: 32px;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 .lb-rank.gold,
 .lb-rank.silver,
@@ -1971,7 +1973,7 @@ nav {
   align-items: center;
   gap: 14px;
   background: linear-gradient(135deg, #2a1a00, #1a1000);
-  border: 1px solid var(--amber);
+  border: 1px solid var(--amber-dim);
   border-radius: 14px;
   padding: 12px 18px;
   box-shadow: 0 0 18px #f5a62328;
@@ -2128,7 +2130,8 @@ nav {
 .peek-row-me {
   background: var(--amber-glow);
   border-radius: 8px;
-  border: 1px solid var(--amber-dim);
+  outline: 1px solid var(--amber-dim);
+  margin: 0 -8px;
   padding-left: 8px;
   padding-right: 8px;
 }
