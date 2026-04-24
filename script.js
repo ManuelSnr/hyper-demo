@@ -40,6 +40,15 @@
 // ===== WALLET =====
 const WALLET_KEY = "hyper_wallet";
 const ENTRY_FEE = 5;
+const BONUS_CLAIMED_KEY = "hyper_bonus_claimed";
+
+function hasBonusClaimed() {
+  return localStorage.getItem(BONUS_CLAIMED_KEY) === "1";
+}
+
+function setBonusClaimed() {
+  localStorage.setItem(BONUS_CLAIMED_KEY, "1");
+}
 
 function getWallet() {
   const v = localStorage.getItem(WALLET_KEY);
@@ -62,6 +71,19 @@ function updateWalletUI() {
 
 function openWalletModal() {
   updateWalletUI();
+  const bonusClaimed = hasBonusClaimed();
+  const walletActions = document.getElementById("wallet-modal-actions");
+  if (walletActions) {
+    walletActions.innerHTML = bonusClaimed
+      ? `
+        <button class="btn-primary" style="width:100%;margin-top:16px" onclick="closeWalletModal();viewLeaderboardFromHome()">View Leaderboard</button>
+        <button class="btn-secondary" style="width:100%;margin-top:8px" onclick="closeWalletModal()">Close</button>
+      `
+      : `
+        <button class="btn-primary" style="width:100%;margin-top:16px" onclick="closeWalletModal();openFeedbackFormModal()">Get Extra $25 Bonus</button>
+        <button class="btn-secondary" style="width:100%;margin-top:8px" onclick="closeWalletModal()">Close</button>
+      `;
+  }
   document.getElementById("wallet-modal").classList.add("show");
 }
 
@@ -304,14 +326,26 @@ function startGame(mode) {
 }
 
 function showOutOfMoneyOverlay() {
-  document.getElementById("result-card").innerHTML = `
+  const bonusClaimed = hasBonusClaimed();
+  document.getElementById("result-card").innerHTML = bonusClaimed
+    ? `
+    <span class="result-emoji">💸</span>
+    <div class="capture-title">OUT OF FUNDS</div>
+    <p class="result-subtitle" style="margin-bottom:24px">
+      <strong style="color:#ffffff">You need $${ENTRY_FEE} to enter this tournament.</strong><br>
+      Check the leaderboard to see how you rank against other players.
+    </p>
+    <button class="btn-primary" onclick="document.getElementById('result-overlay').classList.remove('show');viewLeaderboardFromHome()">View Leaderboard</button>
+    <button class="btn-secondary" onclick="document.getElementById('result-overlay').classList.remove('show')">Close</button>
+  `
+    : `
     <span class="result-emoji">💸</span>
     <div class="capture-title">OUT OF FUNDS</div>
     <p class="result-subtitle" style="margin-bottom:24px">
       <strong style="color:#ffffff">You need $${ENTRY_FEE} to enter this tournament.</strong><br>
       Fill out our feedback form to receive an extra <br><strong style="color:var(--amber)">$25 bonus cash!</strong>
     </p>
-    <button class="btn-primary" onclick="closeOverlay();openFeedbackFormModal()">Get $25 Bonus Cash</button>
+    <button class="btn-primary" onclick="document.getElementById('result-overlay').classList.remove('show');openFeedbackFormModal()">Get $25 Bonus Cash</button>
     <button class="btn-secondary" onclick="document.getElementById('result-overlay').classList.remove('show')">Close</button>
   `;
   document.getElementById("result-overlay").classList.add("show");
@@ -1089,6 +1123,7 @@ function submitStandaloneFeedback() {
   // Grant bonus cash
   const current = getWallet();
   setWallet(current + 25);
+  setBonusClaimed();
   showToast("🎁 $25 bonus cash added to your wallet!");
 
   document.getElementById("feedback-modal-content").innerHTML = `
@@ -1117,12 +1152,12 @@ function renderSuccessCard() {
       ${
         isLeaderboard
           ? "Your score is live. Keep playing to climb higher! Prizes go to the top 20."
-          : "Your feedback means a lot. Stay tuned for our full launch!"
+          : "Your feedback means a lot!"
       }
     </p>
     ${isLeaderboard ? '<button class="btn-primary" onclick="viewLeaderboard()">View Leaderboard</button>' : ""}
     <button class="btn-${isLeaderboard ? "secondary" : "primary"}" onclick="restartGame()">Play Again</button>
-    ${isLeaderboard ? "" : '<button class="btn-secondary" onclick="closeOverlay();goHome()">Back to Games</button>'}
+    ${isLeaderboard ? "" : "<button class=\"btn-secondary\" onclick=\"document.getElementById('result-overlay').classList.remove('show');goHome()\">Back to Games</button>"}
   `;
 }
 
@@ -1242,6 +1277,13 @@ function submitFeedback() {
   }
   if (!valid) return;
 
+  // Grant bonus cash if not already claimed
+  if (!hasBonusClaimed()) {
+    setWallet(getWallet() + 25);
+    setBonusClaimed();
+    showToast("🎁 $25 bonus cash added to your wallet!");
+  }
+
   captureStage = "success";
   renderResultCard();
 }
@@ -1271,28 +1313,41 @@ function viewLeaderboard() {
   showScreen("leaderboard-screen");
 }
 
+function viewLeaderboardFromHome() {
+  leaderboardFilter = currentGame || "sugarrush";
+  renderLeaderboard();
+  document.querySelectorAll("#lb-tabs .lb-tab").forEach((t) => {
+    t.classList.toggle(
+      "active",
+      t.textContent.trim().toLowerCase().replace(/ /g, "") ===
+        leaderboardFilter,
+    );
+  });
+  showScreen("leaderboard-screen");
+}
+
 // ===== LEADERBOARD =====
 const LB_PRIZES = [
-  "$150",
-  "$100",
+  "$125",
   "$75",
-  "$60",
   "$50",
-  "$45",
-  "$40",
   "$35",
   "$30",
   "$25",
   "$20",
-  "$18",
-  "$16",
-  "$14",
-  "$12",
+  "$17.50",
+  "$15",
+  "$12.50",
+  "$11.25",
   "$10",
-  "$8",
-  "$6",
+  "$8.75",
+  "$7.50",
+  "$6.25",
+  "$6.25",
   "$5",
-  "$4",
+  "$5",
+  "$3.75",
+  "$3.75",
 ];
 const LB_RANK_ICONS = [
   '<img src="./assets/1st.svg" class="lb-rank-svg" alt="1st">',

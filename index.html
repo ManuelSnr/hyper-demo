@@ -490,23 +490,25 @@
           <span>🏆 Tournament entry fee:</span>
           <strong>$5.00</strong>
         </div>
-        <button
-          class="btn-primary"
-          style="width: 100%; margin-top: 16px"
-          onclick="
-            closeWalletModal();
-            openFeedbackFormModal();
-          "
-        >
-          Get Extra $25 Bonus
-        </button>
-        <button
-          class="btn-secondary"
-          style="width: 100%; margin-top: 8px"
-          onclick="closeWalletModal()"
-        >
-          Close
-        </button>
+        <div id="wallet-modal-actions">
+          <button
+            class="btn-primary"
+            style="width: 100%; margin-top: 16px"
+            onclick="
+              closeWalletModal();
+              openFeedbackFormModal();
+            "
+          >
+            Get Extra $25 Bonus
+          </button>
+          <button
+            class="btn-secondary"
+            style="width: 100%; margin-top: 8px"
+            onclick="closeWalletModal()"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
 
