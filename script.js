@@ -37,6 +37,57 @@
   setInterval(tick, 1000);
 })();
 
+// ===== WALLET =====
+const WALLET_KEY = "hyper_wallet";
+const ENTRY_FEE = 5;
+
+function getWallet() {
+  const v = localStorage.getItem(WALLET_KEY);
+  return v !== null ? parseFloat(v) : 25;
+}
+
+function setWallet(amount) {
+  localStorage.setItem(WALLET_KEY, amount.toFixed(2));
+  updateWalletUI();
+}
+
+function updateWalletUI() {
+  const bal = getWallet();
+  const formatted = "$" + bal.toFixed(2);
+  const navBal = document.getElementById("wallet-nav-balance");
+  if (navBal) navBal.textContent = formatted;
+  const dispBal = document.getElementById("wallet-balance-display");
+  if (dispBal) dispBal.textContent = formatted;
+}
+
+function openWalletModal() {
+  updateWalletUI();
+  document.getElementById("wallet-modal").classList.add("show");
+}
+
+function closeWalletModal() {
+  document.getElementById("wallet-modal").classList.remove("show");
+}
+
+function openFeedbackFormModal() {
+  renderStandaloneFeedbackForm();
+  document.getElementById("feedback-modal").classList.add("show");
+}
+
+function closeFeedbackModal() {
+  document.getElementById("feedback-modal").classList.remove("show");
+}
+
+// Click outside to close modals
+document.getElementById("wallet-modal").addEventListener("click", function (e) {
+  if (e.target === this) closeWalletModal();
+});
+document
+  .getElementById("feedback-modal")
+  .addEventListener("click", function (e) {
+    if (e.target === this) closeFeedbackModal();
+  });
+
 // ===== STATE =====
 let currentGame = null;
 let currentMode = null;
@@ -44,7 +95,7 @@ let finalScore = 0;
 let gameLoop = null;
 let gameActive = false;
 let captureStage = "result"; // result | form | success
-let leaderboardFilter = "all";
+let leaderboardFilter = "sugarrush";
 let starRating = 0;
 
 // ===== PLAYER PROFILE (localStorage) =====
@@ -196,10 +247,10 @@ function selectGame(gameId) {
 }
 
 function renderLBPeek(gameId) {
-  const rows = leaderboard
+  const sorted = leaderboard
     .filter((e) => e.game === gameId)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 3);
+    .sort((a, b) => b.score - a.score);
+  const rows = sorted.slice(0, 3);
   const cont = document.getElementById("lb-peek-rows");
   const rankIcons = [
     '<img src="./assets/1st.svg" class="peek-rank-svg" alt="1st">',
@@ -207,23 +258,38 @@ function renderLBPeek(gameId) {
     '<img src="./assets/3rd.svg" class="peek-rank-svg" alt="3rd">',
   ];
   const rankClasses = ["gold", "silver", "bronze"];
+  const profile = getProfile();
   cont.innerHTML = rows.length
     ? rows
-        .map(
-          (r, i) => `
-    <div class="lb-row peek-row">
+        .map((r, i) => {
+          const prize = LB_PRIZES[i] || "";
+          const isMe = r.isUser && profile && r._profileId === profile.id;
+          return `
+    <div class="lb-row peek-row${isMe ? " peek-row-me" : ""}">
       <span class="lb-rank ${rankClasses[i]}">${rankIcons[i]}</span>
       <span class="peek-avatar">${getAvatar(r)}</span>
-      <span class="lb-name">${r.name}${r.isUser ? ' <span class="lb-you-tag">YOU</span>' : ""}</span>
+      <span class="lb-name">${r.name}</span>
       <span class="lb-score">${r.score.toLocaleString()}</span>
-    </div>
-  `,
-        )
+      ${prize ? `<span class="lb-prize${i < 3 ? "" : ""}">${prize}</span>` : ""}
+    </div>`;
+        })
         .join("")
     : '<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px">Be the first to score!</div>';
 }
 
 function startGame(mode) {
+  if (mode === "tournament") {
+    const balance = getWallet();
+    if (balance < ENTRY_FEE) {
+      // Show out-of-money message
+      showOutOfMoneyOverlay();
+      return;
+    }
+    setWallet(balance - ENTRY_FEE);
+    showToast(
+      `$${ENTRY_FEE} entry fee deducted. Balance: $${getWallet().toFixed(2)}`,
+    );
+  }
   currentMode = mode;
   const g = GAMES[currentGame];
   document.getElementById("game-name-label").textContent = g.title;
@@ -233,6 +299,20 @@ function startGame(mode) {
   document.getElementById("game-instructions").textContent = g.instructions;
   showScreen("game-screen");
   initGame(currentGame);
+}
+
+function showOutOfMoneyOverlay() {
+  document.getElementById("result-card").innerHTML = `
+    <span class="result-emoji">💸</span>
+    <div class="capture-title">OUT OF FUNDS</div>
+    <p class="result-subtitle" style="margin-bottom:24px">
+      You need $${ENTRY_FEE} to enter a tournament but your wallet is empty.<br>
+      Fill out our feedback form to receive an extra <strong style="color:var(--amber)">$25 bonus cash!</strong>
+    </p>
+    <button class="btn-primary" onclick="closeOverlay();openFeedbackFormModal()">🎁 Get $25 Bonus Cash</button>
+    <button class="btn-secondary" onclick="closeOverlay()">Back</button>
+  `;
+  document.getElementById("result-overlay").classList.add("show");
 }
 
 function exitGame() {
@@ -683,8 +763,12 @@ function showResult() {
 
 function renderResultCard() {
   const g = GAMES[currentGame];
-  const isTop30 = leaderboard.filter((e) => e.score > finalScore).length < 30;
-  const rank = leaderboard.filter((e) => e.score > finalScore).length + 1;
+  const isTop20 =
+    leaderboard.filter((e) => e.game === currentGame && e.score > finalScore)
+      .length < 20;
+  const rank =
+    leaderboard.filter((e) => e.game === currentGame && e.score > finalScore)
+      .length + 1;
 
   if (captureStage === "result") {
     const prizeHtml =
@@ -692,7 +776,7 @@ function renderResultCard() {
         ? `
       <div class="prize-potential">
         ${
-          isTop30
+          isTop20
             ? `🏆 You're currently ranked <strong>#${rank}</strong>, that's in the <strong style="color:var(--amber)">prize zone!</strong><br><small style="color:var(--muted)">Save your score to lock in your spot.</small>`
             : `📈 You're ranked <strong>#${rank}</strong> right now. Play again to climb higher!`
         }
@@ -750,6 +834,29 @@ function renderTournamentForm() {
     return;
   }
 
+  const countryCodes = [
+    { code: "+1", flag: "🇺🇸", name: "US" },
+    { code: "+44", flag: "🇬🇧", name: "UK" },
+    { code: "+234", flag: "🇳🇬", name: "NG" },
+    { code: "+27", flag: "🇿🇦", name: "ZA" },
+    { code: "+254", flag: "🇰🇪", name: "KE" },
+    { code: "+233", flag: "🇬🇭", name: "GH" },
+    { code: "+49", flag: "🇩🇪", name: "DE" },
+    { code: "+33", flag: "🇫🇷", name: "FR" },
+    { code: "+971", flag: "🇦🇪", name: "AE" },
+    { code: "+91", flag: "🇮🇳", name: "IN" },
+    { code: "+86", flag: "🇨🇳", name: "CN" },
+    { code: "+55", flag: "🇧🇷", name: "BR" },
+    { code: "+52", flag: "🇲🇽", name: "MX" },
+    { code: "+61", flag: "🇦🇺", name: "AU" },
+    { code: "+81", flag: "🇯🇵", name: "JP" },
+  ]
+    .map(
+      (c) =>
+        `<option value="${c.code}">${c.flag} ${c.name} (${c.code})</option>`,
+    )
+    .join("");
+
   document.getElementById("result-card").innerHTML = `
     <span class="result-emoji">🏆</span>
     <div class="capture-title">${existing ? "NEW BEST SCORE!" : "SAVE YOUR SCORE"}</div>
@@ -772,12 +879,15 @@ function renderTournamentForm() {
       <input type="text" id="f-name" placeholder="How you'll appear on the board" maxlength="20" value="${profile?.name || ""}">
     </div>
     <div class="form-field">
-      <label>Phone Number</label>
-      <input type="tel" id="f-phone" placeholder="+234 000 000 0000" value="${profile?.phone || ""}">
+      <label>Phone Number <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+      <div class="phone-field-wrap">
+        <select id="f-phone-code" class="phone-code-select">${countryCodes}</select>
+        <input type="tel" id="f-phone" placeholder="000 000 0000" value="${profile?.phone || ""}">
+      </div>
     </div>
     <div class="form-field">
-      <label>Email Address</label>
-      <input type="email" id="f-email" placeholder="winner@email.com" value="${profile?.email || ""}">
+      <label>Work Email</label>
+      <input type="email" id="f-email" placeholder="Enter your work email" value="${profile?.email || ""}">
     </div>
     `
         : ""
@@ -787,8 +897,31 @@ function renderTournamentForm() {
   `;
 }
 
-function renderFeedbackForm() {
-  document.getElementById("result-card").innerHTML = `
+function feedbackFormHTML(onSubmit, onBack) {
+  const countryCodes = [
+    { code: "+1", flag: "🇺🇸", name: "US" },
+    { code: "+44", flag: "🇬🇧", name: "UK" },
+    { code: "+234", flag: "🇳🇬", name: "NG" },
+    { code: "+27", flag: "🇿🇦", name: "ZA" },
+    { code: "+254", flag: "🇰🇪", name: "KE" },
+    { code: "+233", flag: "🇬🇭", name: "GH" },
+    { code: "+49", flag: "🇩🇪", name: "DE" },
+    { code: "+33", flag: "🇫🇷", name: "FR" },
+    { code: "+971", flag: "🇦🇪", name: "AE" },
+    { code: "+91", flag: "🇮🇳", name: "IN" },
+    { code: "+86", flag: "🇨🇳", name: "CN" },
+    { code: "+55", flag: "🇧🇷", name: "BR" },
+    { code: "+52", flag: "🇲🇽", name: "MX" },
+    { code: "+61", flag: "🇦🇺", name: "AU" },
+    { code: "+81", flag: "🇯🇵", name: "JP" },
+  ]
+    .map(
+      (c) =>
+        `<option value="${c.code}">${c.flag} ${c.name} (${c.code})</option>`,
+    )
+    .join("");
+
+  return `
     <span class="result-emoji">💬</span>
     <div class="capture-title">QUICK FEEDBACK</div>
     <p class="capture-sub">What do you think about skill gaming? Your opinion helps us build something great.</p>
@@ -809,6 +942,17 @@ function renderFeedbackForm() {
       </select>
     </div>
     <div class="form-field">
+      <label>What does your company do?</label>
+      <select id="f-company-type">
+        <option value="">Select an option...</option>
+        <option>Game Operator</option>
+        <option>Game Provider</option>
+        <option>Aggregator</option>
+        <option>Software Provider</option>
+        <option>Others</option>
+      </select>
+    </div>
+    <div class="form-field">
       <label>Your thoughts (optional)</label>
       <textarea id="f-thoughts" placeholder="What did you enjoy? What could be better?"></textarea>
     </div>
@@ -817,11 +961,70 @@ function renderFeedbackForm() {
       <input type="text" id="f-name" placeholder="How should we call you?">
     </div>
     <div class="form-field">
-      <label>Phone / Email</label>
-      <input type="text" id="f-contact" placeholder="Stay in the loop.">
+      <label>Work Email</label>
+      <input type="email" id="f-email" placeholder="Enter your work email">
     </div>
-    <button class="btn-primary" onclick="submitFeedback()">Submit Feedback</button>
-    <button class="btn-secondary" onclick="captureStage='result';renderResultCard()">Back</button>
+    <div class="form-field">
+      <label>Phone Number <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+      <div class="phone-field-wrap">
+        <select id="f-phone-code" class="phone-code-select">${countryCodes}</select>
+        <input type="tel" id="f-phone" placeholder="000 000 0000">
+      </div>
+    </div>
+    <button class="btn-primary" onclick="${onSubmit}">Submit Feedback</button>
+    <button class="btn-secondary" onclick="${onBack}">Back</button>
+  `;
+}
+
+function renderFeedbackForm() {
+  document.getElementById("result-card").innerHTML = feedbackFormHTML(
+    "submitFeedback()",
+    "captureStage='result';renderResultCard()",
+  );
+}
+
+function renderStandaloneFeedbackForm() {
+  const cont = document.getElementById("feedback-modal-content");
+  cont.innerHTML = feedbackFormHTML(
+    "submitStandaloneFeedback()",
+    "closeFeedbackModal()",
+  );
+}
+
+function submitStandaloneFeedback() {
+  clearFieldErrors();
+  const name = document.getElementById("f-name")?.value?.trim();
+  const email = document.getElementById("f-email")?.value?.trim();
+  const intent = document.getElementById("f-intent")?.value?.trim();
+  const companyType = document.getElementById("f-company-type")?.value?.trim();
+
+  let valid = true;
+  if (!name) {
+    setFieldError("f-name", "Name is required");
+    valid = false;
+  }
+  if (!email) {
+    setFieldError("f-email", "Work email is required");
+    valid = false;
+  }
+  if (!intent) {
+    setFieldError("f-intent", "Please select an option");
+    valid = false;
+  }
+  if (!valid) return;
+
+  // Grant bonus cash
+  const current = getWallet();
+  setWallet(current + 25);
+  showToast("🎁 $25 bonus cash added to your wallet!");
+
+  document.getElementById("feedback-modal-content").innerHTML = `
+    <div style="text-align:center;padding:24px 0">
+      <div style="font-size:48px;margin-bottom:16px">🙏</div>
+      <div class="capture-title">THANKS!</div>
+      <p class="result-subtitle" style="margin-bottom:24px">Your feedback means a lot. <strong style="color:var(--amber)">$25 bonus cash</strong> has been added to your wallet!</p>
+      <button class="btn-primary" style="width:100%" onclick="closeFeedbackModal()">Done</button>
+    </div>
   `;
 }
 
@@ -840,7 +1043,7 @@ function renderSuccessCard() {
     <p class="result-subtitle" style="margin-bottom:24px">
       ${
         isLeaderboard
-          ? "Your score is live. Keep playing to climb higher! Prizes go to the top 30."
+          ? "Your score is live. Keep playing to climb higher! Prizes go to the top 20."
           : "Your feedback means a lot. Stay tuned for our full launch!"
       }
     </p>
@@ -884,9 +1087,13 @@ function submitScore() {
   const name = isReturning
     ? profile.name
     : document.getElementById("f-name")?.value?.trim();
+  const phoneCode = document.getElementById("f-phone-code")?.value || "";
+  const phoneNum = document.getElementById("f-phone")?.value?.trim() || "";
   const phone = isReturning
     ? profile.phone
-    : document.getElementById("f-phone")?.value?.trim();
+    : phoneNum
+      ? phoneCode + " " + phoneNum
+      : "";
   const email = isReturning
     ? profile.email
     : document.getElementById("f-email")?.value?.trim();
@@ -897,8 +1104,8 @@ function submitScore() {
       setFieldError("f-name", "Display name is required");
       valid = false;
     }
-    if (!phone) {
-      setFieldError("f-phone", "Phone number is required");
+    if (!email) {
+      setFieldError("f-email", "Work email is required");
       valid = false;
     }
     if (!valid) return;
@@ -950,7 +1157,7 @@ function submitFeedback() {
   clearFieldErrors();
   const intent = document.getElementById("f-intent")?.value?.trim();
   const name = document.getElementById("f-name")?.value?.trim();
-  const contact = document.getElementById("f-contact")?.value?.trim();
+  const email = document.getElementById("f-email")?.value?.trim();
 
   let valid = true;
   if (!starRating) {
@@ -974,8 +1181,8 @@ function submitFeedback() {
     setFieldError("f-name", "Name is required");
     valid = false;
   }
-  if (!contact) {
-    setFieldError("f-contact", "Phone or email is required");
+  if (!email) {
+    setFieldError("f-email", "Work email is required");
     valid = false;
   }
   if (!valid) return;
@@ -996,8 +1203,16 @@ function restartGame() {
 
 function viewLeaderboard() {
   document.getElementById("result-overlay").classList.remove("show");
-  leaderboardFilter = "all";
+  leaderboardFilter = currentGame || "sugarrush";
   renderLeaderboard();
+  // Activate the correct tab
+  document.querySelectorAll("#lb-tabs .lb-tab").forEach((t) => {
+    t.classList.toggle(
+      "active",
+      t.textContent.trim().toLowerCase().replace(/ /g, "") ===
+        leaderboardFilter,
+    );
+  });
   showScreen("leaderboard-screen");
 }
 
@@ -1008,11 +1223,21 @@ const LB_PRIZES = [
   "$75",
   "$60",
   "$50",
+  "$45",
   "$40",
+  "$35",
   "$30",
   "$25",
   "$20",
-  "$15",
+  "$18",
+  "$16",
+  "$14",
+  "$12",
+  "$10",
+  "$8",
+  "$6",
+  "$5",
+  "$4",
 ];
 const LB_RANK_ICONS = [
   '<img src="./assets/1st.svg" class="lb-rank-svg" alt="1st">',
@@ -1034,35 +1259,37 @@ function getAvatar(entry) {
 
 function buildLBRows(filtered, gameNameMap) {
   const rankClass = ["r1", "r2", "r3"];
+  const profile = getProfile();
   return filtered
-    .map(
-      (e, i) => `
-    <div class="lb-entry ${i < 3 ? "top3" : ""} ${e.isUser ? "user-entry" : ""}">
+    .map((e, i) => {
+      const isMe = e.isUser && profile && e._profileId === profile.id;
+      return `
+    <div class="lb-entry ${i < 3 ? "top3" : ""} ${isMe ? "user-entry user-entry-highlight" : ""}">
       <div class="lb-rank-big ${rankClass[i] || ""}">${i < 3 ? LB_RANK_ICONS[i] : `#${i + 1}`}</div>
       <div class="lb-player">
         <div class="lb-avatar-wrap">${getAvatar(e)}</div>
-        <div class="lb-player-name">${e.name}${e.isUser ? ' <span class="lb-you-tag">YOU</span>' : ""}</div>
+        <div class="lb-player-name">${e.name}${isMe ? ' <span class="lb-me-badge">YOU</span>' : ""}</div>
       </div>
       <div class="lb-score-big">${e.score.toLocaleString()}</div>
       <div class="lb-game-tag">${gameNameMap[e.game] || e.game}</div>
       <div class="lb-prize-col">${i < LB_PRIZES.length ? `<span class="lb-prize">${LB_PRIZES[i]}</span>` : ""}</div>
-    </div>`,
-    )
+    </div>`;
+    })
     .join("");
 }
 
 function filterLB(game) {
   leaderboardFilter = game;
   document
-    .querySelectorAll(".lb-tab")
+    .querySelectorAll("#lb-tabs .lb-tab")
     .forEach((t) => t.classList.remove("active"));
-  event.target.classList.add("active");
+  if (event && event.target) event.target.classList.add("active");
   renderLeaderboard();
 }
 
 function renderLeaderboard() {
   const filtered = leaderboard
-    .filter((e) => leaderboardFilter === "all" || e.game === leaderboardFilter)
+    .filter((e) => e.game === leaderboardFilter)
     .sort((a, b) => b.score - a.score);
   const cont = document.getElementById("lb-entries");
   if (!cont) return;
@@ -1083,9 +1310,10 @@ function showToast(msg) {
 }
 
 // Init
-let homeLBFilter = "all";
+let homeLBFilter = "sugarrush";
 renderLeaderboard();
 renderHomeLeaderboard();
+updateWalletUI();
 
 function filterHomeLB(game, btn) {
   homeLBFilter = game;
@@ -1098,7 +1326,7 @@ function filterHomeLB(game, btn) {
 
 function renderHomeLeaderboard() {
   const filtered = leaderboard
-    .filter((e) => homeLBFilter === "all" || e.game === homeLBFilter)
+    .filter((e) => e.game === homeLBFilter)
     .sort((a, b) => b.score - a.score);
   const cont = document.getElementById("home-lb-entries");
   if (!cont) return;

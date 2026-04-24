@@ -55,8 +55,8 @@ body {
 nav {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 20px 40px;
+  justify-content: space-between;
+  padding: 16px 24px;
   border-bottom: 1px solid var(--border);
   background: var(--bg);
   position: sticky;
@@ -67,15 +67,92 @@ nav {
     0 1px 0 0 #f5a62318,
     0 4px 32px #00000080;
 }
+.nav-spacer {
+  flex: 1;
+}
 .nav-logo {
   display: flex;
   align-items: center;
 }
 .nav-logo-img {
-  height: 20px;
+  height: 32px;
   width: auto;
   display: block;
 }
+
+/* Wallet nav button */
+.wallet-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--amber-dim);
+  border-radius: 100px;
+  padding: 8px 16px;
+  cursor: pointer;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+.wallet-nav-btn:hover {
+  border-color: var(--amber);
+  background: var(--amber-glow);
+}
+.wallet-nav-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  display: block;
+}
+.wallet-nav-label {
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+.wallet-nav-balance {
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 1px;
+}
+
+/* ===== TICKER BANNER ===== */
+.ticker-banner {
+  background: var(--amber);
+  color: #000;
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 10px 0;
+  position: sticky;
+  top: 57px;
+  z-index: 9999;
+}
+.ticker-track {
+  display: inline-block;
+  animation: ticker-scroll 28s linear infinite;
+}
+.ticker-item {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 0 24px;
+}
+.ticker-sep {
+  font-size: 11px;
+  opacity: 0.5;
+}
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 .nav-countdown {
   display: flex;
   align-items: center;
@@ -143,8 +220,13 @@ nav {
 
 .hero {
   text-align: center;
-  padding: 80px 20px 60px;
+  padding: 80px 20px 120px;
   position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 .hero-eyebrow {
   font-family: var(--font-mono);
@@ -380,24 +462,27 @@ nav {
 .hero-scroll-indicator {
   position: absolute;
   bottom: 32px;
-  right: 40px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
   cursor: pointer;
   user-select: none;
+  z-index: 2;
 }
 .hero-scroll-label {
   font-family: var(--font-mono);
   font-size: 9px;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--text);
   animation: scrollFade 2.5s ease-in-out infinite;
 }
 .hero-scroll-arrow {
   color: var(--amber);
+  filter: drop-shadow(0 0 6px var(--amber));
   animation: scrollBounce 1.4s ease-in-out infinite;
 }
 @keyframes scrollBounce {
@@ -798,6 +883,14 @@ nav {
     transform 0.2s,
     border-color 0.2s;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+}
+.mode-card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
 .mode-card:hover {
   transform: translateY(-3px);
@@ -815,7 +908,6 @@ nav {
 }
 .mode-icon {
   font-size: 32px;
-  margin-bottom: 12px;
   display: flex;
   align-items: center;
 }
@@ -838,10 +930,10 @@ nav {
   font-size: 13px;
   color: var(--muted);
   line-height: 1.5;
+  flex: 1;
 }
 .mode-tag {
   display: inline-block;
-  margin-top: 12px;
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 700;
@@ -849,14 +941,46 @@ nav {
   text-transform: uppercase;
   padding: 4px 10px;
   border-radius: 4px;
+  white-space: nowrap;
 }
-.mode-card.tournament .mode-tag {
+.tournament-tag {
   background: var(--amber);
   color: #000;
 }
-.mode-card.practice .mode-tag {
+.practice-tag {
   background: var(--surface2);
   color: var(--muted);
+  border: 1px solid var(--border);
+}
+/* Big play buttons on mode cards */
+.mode-play-btn {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  padding: 14px 0;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition:
+    opacity 0.2s,
+    transform 0.15s;
+}
+.mode-play-btn:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+.tournament-play-btn {
+  background: var(--amber);
+  color: #000;
+  box-shadow: 0 4px 20px #f5a62340;
+}
+.practice-play-btn {
+  background: var(--purple);
+  color: #fff;
+  box-shadow: 0 4px 20px #7c3aed40;
 }
 
 .leaderboard-peek {
@@ -885,6 +1009,14 @@ nav {
   padding: 8px 0;
   border-bottom: 1px solid var(--border);
   font-size: 14px;
+}
+.lb-row .lb-score {
+  margin-left: auto;
+}
+.lb-row .lb-prize {
+  margin-left: 8px;
+  font-size: 12px;
+  padding: 4px 10px;
 }
 .lb-row:last-child {
   border-bottom: none;
@@ -1827,4 +1959,208 @@ nav {
   box-shadow:
     0 1px 0 0 #f5a62318,
     0 4px 32px #00000080;
+}
+
+/* ===== SELECT SCREEN PRIZE POOL ===== */
+.select-prize-pool {
+  margin: 0 0 20px 0;
+  display: flex;
+}
+.select-prize-pool-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, #2a1a00, #1a1000);
+  border: 1px solid var(--amber);
+  border-radius: 14px;
+  padding: 12px 18px;
+  box-shadow: 0 0 18px #f5a62328;
+}
+.select-prize-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 6px var(--amber));
+}
+.select-prize-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 70px;
+}
+.select-prize-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.select-prize-amount {
+  font-family: var(--font-display);
+  font-size: 48px;
+  color: var(--amber);
+  line-height: 1;
+  text-shadow: 0 0 16px #f5a62380;
+}
+.select-prize-divider {
+  width: 1px;
+  height: 36px;
+  background: var(--amber-dim);
+  flex-shrink: 0;
+}
+.select-prize-slots {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  align-items: center;
+}
+.select-prize-slot {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--amber-glow);
+  border: 1px solid var(--amber-dim);
+  border-radius: 8px;
+  padding: 5px 10px;
+}
+.select-prize-rank-svg {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+.select-prize-slot span {
+  font-weight: 700;
+  color: var(--amber);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 6px #f5a62360;
+}
+
+/* ===== WALLET MODAL ===== */
+.wallet-modal-card {
+  max-width: 420px;
+  text-align: center;
+}
+.wallet-modal-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.wallet-modal-emoji {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  display: block;
+}
+.wallet-modal-header h3 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 2px;
+}
+.wallet-balance-display {
+  font-family: var(--font-display);
+  font-size: 56px;
+  color: var(--amber);
+  text-shadow: var(--neon-amber-glow);
+  margin: 8px 0;
+  line-height: 1;
+}
+.wallet-modal-note {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.wallet-modal-note strong {
+  color: var(--text);
+}
+.wallet-modal-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--amber-glow);
+  border: 1px solid var(--amber-dim);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-family: var(--font-mono);
+}
+.wallet-modal-entry strong {
+  color: var(--amber);
+}
+
+/* ===== FEEDBACK MODAL ===== */
+.feedback-modal-card {
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* ===== USER LEADERBOARD ROW HIGHLIGHT ===== */
+.user-entry-highlight {
+  background: linear-gradient(135deg, #f5a62318 0%, #f5a62308 100%) !important;
+  border: 1.5px solid var(--amber) !important;
+  box-shadow: 0 0 12px #f5a62328 !important;
+  border-radius: 12px;
+}
+.lb-me-badge {
+  display: inline-block;
+  background: var(--amber);
+  color: #000;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* ===== PEEK ROW HIGHLIGHT (current user) ===== */
+.peek-row-me {
+  background: var(--amber-glow);
+  border-radius: 8px;
+  border: 1px solid var(--amber-dim);
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+/* ===== PEEK PRIZE ===== */
+.peek-prize {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--amber);
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* ===== PHONE FIELD ===== */
+.phone-field-wrap {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.phone-code-select {
+  flex-shrink: 0;
+  width: 140px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 10px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  appearance: auto;
+}
+.phone-field-wrap input {
+  flex: 1;
 }

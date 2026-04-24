@@ -30,15 +30,47 @@
       <div class="nav-logo" onclick="goHome()" style="cursor: pointer">
         <img src="./assets/Logo.svg" alt="Hyper" class="nav-logo-img" />
       </div>
+      <div class="nav-spacer"></div>
+      <button
+        class="wallet-nav-btn"
+        onclick="openWalletModal()"
+        id="wallet-nav-btn"
+      >
+        <img src="./assets/wallet.svg" alt="Wallet" class="wallet-nav-icon" />
+        <span class="wallet-nav-label">WALLET</span>
+        <span class="wallet-nav-balance" id="wallet-nav-balance">$25.00</span>
+      </button>
     </nav>
+
+    <!-- ROLLING BANNER -->
+    <div class="ticker-banner">
+      <div class="ticker-track">
+        <span class="ticker-item"
+          >SKILL GAMING IS THE FUTURE — VISIT BOOTH E02 TO SEE THE STATS</span
+        >
+        <span class="ticker-sep">✦</span>
+        <span class="ticker-item"
+          >SKILL GAMING IS THE FUTURE — VISIT BOOTH E02 TO SEE THE STATS</span
+        >
+        <span class="ticker-sep">✦</span>
+        <span class="ticker-item"
+          >SKILL GAMING IS THE FUTURE — VISIT BOOTH E02 TO SEE THE STATS</span
+        >
+        <span class="ticker-sep">✦</span>
+        <span class="ticker-item"
+          >SKILL GAMING IS THE FUTURE — VISIT BOOTH E02 TO SEE THE STATS</span
+        >
+        <span class="ticker-sep">✦</span>
+      </div>
+    </div>
 
     <!-- ===== HOME ===== -->
     <div class="screen active" id="home">
       <div class="hero animate-in">
         <h1>PLAY GAMES.<br /><em>WIN CASH.</em></h1>
         <p class="hero-sub">
-          Compete in skill-based games and climb the leaderboard. Top 30 players
-          win real prizes.
+          Win real money in games like Candy Crush, Subway Surfers, 8-ball, and
+          many others. Top 20 win real money.
         </p>
         <div class="prize-stack">
           <div
@@ -55,6 +87,7 @@
             <div class="prize-banner-content">
               <div class="prize-banner-label">PRIZE POOL</div>
               <div class="prize-banner-amount">$500</div>
+              <div class="prize-banner-sub">PER GAME</div>
             </div>
             <div class="prize-banner-divider"></div>
             <div class="prize-banner-slots">
@@ -201,10 +234,10 @@
             <h2 class="home-lb-title">LEADERBOARD</h2>
           </div>
           <div class="lb-tabs" id="home-lb-tabs">
-            <button class="lb-tab active" onclick="filterHomeLB('all', this)">
-              All Games
-            </button>
-            <button class="lb-tab" onclick="filterHomeLB('sugarrush', this)">
+            <button
+              class="lb-tab active"
+              onclick="filterHomeLB('sugarrush', this)"
+            >
               Sugar Rush
             </button>
             <button class="lb-tab" onclick="filterHomeLB('soloshooter', this)">
@@ -246,32 +279,81 @@
         <h2 id="select-title"></h2>
         <p id="select-desc"></p>
 
+        <!-- Prize pool per game -->
+        <div class="select-prize-pool">
+          <div class="select-prize-pool-inner">
+            <img
+              src="./assets/prize-pool.svg"
+              alt="Prize Pool"
+              class="select-prize-icon"
+            />
+            <div class="select-prize-text">
+              <div class="select-prize-label">PRIZE POOL</div>
+              <div class="select-prize-amount">$500</div>
+            </div>
+            <div class="select-prize-divider"></div>
+            <div class="select-prize-slots">
+              <div class="select-prize-slot">
+                <img
+                  src="./assets/1st.svg"
+                  alt="1st"
+                  class="select-prize-rank-svg"
+                /><span>$150</span>
+              </div>
+              <div class="select-prize-slot">
+                <img
+                  src="./assets/2nd.svg"
+                  alt="2nd"
+                  class="select-prize-rank-svg"
+                /><span>$100</span>
+              </div>
+              <div class="select-prize-slot">
+                <img
+                  src="./assets/3rd.svg"
+                  alt="3rd"
+                  class="select-prize-rank-svg"
+                /><span>$75</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="mode-cards">
           <div class="mode-card tournament" onclick="startGame('tournament')">
-            <div class="mode-icon">
-              <img
-                src="./assets/tournament.svg"
-                alt="Tournament"
-                class="mode-icon-svg"
-              />
+            <div class="mode-card-top-row">
+              <div class="mode-icon">
+                <img
+                  src="./assets/tournament.svg"
+                  alt="Tournament"
+                  class="mode-icon-svg"
+                />
+              </div>
+              <!--<span class="mode-tag tournament-tag">Entry: $5</span>-->
             </div>
-            <h3>JOIN TOURNAMENT</h3>
+            <h3>TOURNAMENT</h3>
             <p>
-              Your score goes on the leaderboard. Top 30 players win prizes.
+              Your score goes on the leaderboard. Top 20 players win prizes.
             </p>
-            <span class="mode-tag">FREE ENTRY</span>
+            <button class="mode-play-btn tournament-play-btn">
+              JOIN TOURNAMENT · $5
+            </button>
           </div>
           <div class="mode-card practice" onclick="startGame('practice')">
-            <div class="mode-icon">
-              <img
-                src="./assets/practice.svg"
-                alt="Practice"
-                class="mode-icon-svg"
-              />
+            <div class="mode-card-top-row">
+              <div class="mode-icon">
+                <img
+                  src="./assets/practice.svg"
+                  alt="Practice"
+                  class="mode-icon-svg"
+                />
+              </div>
+              <!-- <span class="mode-tag practice-tag">NO STAKES</span>-->
             </div>
             <h3>PRACTICE</h3>
             <p>Play without pressure. Get comfortable before you compete.</p>
-            <span class="mode-tag">NO STAKES</span>
+            <button class="mode-play-btn practice-play-btn">
+              PLAY PRACTICE
+            </button>
           </div>
         </div>
 
@@ -347,10 +429,7 @@
         </div>
         <div>
           <div class="lb-tabs" id="lb-tabs">
-            <button class="lb-tab active" onclick="filterLB('all')">
-              All Games
-            </button>
-            <button class="lb-tab" onclick="filterLB('sugarrush')">
+            <button class="lb-tab active" onclick="filterLB('sugarrush')">
               Sugar Rush
             </button>
             <button class="lb-tab" onclick="filterLB('soloshooter')">
@@ -374,7 +453,7 @@
       </div>
       <div class="play-again-bar">
         <button class="btn-primary" onclick="goHome()">
-          🎮 Play Another Game
+          Play Another Game
         </button>
       </div>
     </div>
@@ -383,6 +462,56 @@
     <div class="overlay" id="result-overlay">
       <div class="overlay-card" id="result-card">
         <!-- dynamically filled -->
+      </div>
+    </div>
+
+    <!-- ===== WALLET MODAL ===== -->
+    <div class="overlay" id="wallet-modal">
+      <div class="overlay-card wallet-modal-card">
+        <div class="wallet-modal-header">
+          <img
+            src="./assets/wallet.svg"
+            alt="Wallet"
+            class="wallet-modal-emoji"
+          />
+          <h3>YOUR WALLET</h3>
+        </div>
+        <div class="wallet-balance-display" id="wallet-balance-display">
+          $25.00
+        </div>
+        <div class="wallet-modal-note">
+          <strong>This is bonus cash.</strong> Use bonus cash to enter
+          tournaments. To win real cash, you need to appear on the leaderboard.
+          Top 20 players per game win real prizes.
+        </div>
+        <div class="wallet-modal-entry">
+          <span>🏆 Tournament entry fee:</span>
+          <strong>$5.00</strong>
+        </div>
+        <button
+          class="btn-primary"
+          style="width: 100%; margin-top: 16px"
+          onclick="
+            closeWalletModal();
+            openFeedbackFormModal();
+          "
+        >
+          Get Extra $25
+        </button>
+        <button
+          class="btn-secondary"
+          style="width: 100%; margin-top: 8px"
+          onclick="closeWalletModal()"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== FEEDBACK FORM MODAL ===== -->
+    <div class="overlay" id="feedback-modal">
+      <div class="overlay-card feedback-modal-card">
+        <div id="feedback-modal-content"></div>
       </div>
     </div>
 
