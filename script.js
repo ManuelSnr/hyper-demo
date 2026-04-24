@@ -299,6 +299,12 @@ function selectGame(gameId) {
   document.getElementById("select-desc").textContent = g.desc;
 
   renderLBPeek(gameId);
+
+  // Sync player count
+  const counts = getPlayerCounts();
+  const el = document.getElementById("select-players-count");
+  if (el) el.textContent = counts[gameId] ?? 0;
+
   showScreen("game-select");
 }
 
@@ -836,6 +842,63 @@ function renderResultCard() {
       .length + 1;
 
   if (captureStage === "result") {
+    const profile = getProfile();
+    const submittedEmail = getSubmittedEmail();
+    const isReturning = !!profile?.email || !!submittedEmail;
+    const existing = profile ? getExistingEntry(currentGame) : null;
+
+    // Returning tournament user — skip "Your Score" screen entirely
+    if (isReturning && currentMode === "tournament") {
+      if (existing && existing.score >= finalScore) {
+        // Not a new best
+        document.getElementById("result-card").innerHTML = `
+          <span class="result-emoji">📊</span>
+          <div class="capture-title">BEAT YOUR BEST SCORE</div>
+          <p class="result-subtitle" style="margin-bottom:24px">Play again to beat your best score!</p>
+          <div class="score-compare">
+            <div class="score-compare-col ${finalScore < existing.score ? "score-compare-dim" : ""}">
+              <div class="score-compare-label">YOUR SCORE</div>
+              <div class="score-compare-value">${finalScore.toLocaleString()}</div>
+            </div>
+            <div class="score-compare-divider">|</div>
+            <div class="score-compare-col ${existing.score < finalScore ? "score-compare-dim" : ""}">
+              <div class="score-compare-label">BEST SCORE</div>
+              <div class="score-compare-value" style="color:var(--amber)">${existing.score.toLocaleString()}</div>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="restartGame()">Play Again</button>
+          <button class="btn-secondary" onclick="viewLeaderboard()">View Leaderboard</button>
+        `;
+      } else {
+        // New best — auto-submit and show new best modal
+        submitScore();
+        const newRank =
+          leaderboard.filter(
+            (e) => e.game === currentGame && e.score > finalScore,
+          ).length + 1;
+        const newIsTop20 = newRank <= 20;
+        document.getElementById("result-card").innerHTML = `
+          <span class="result-emoji">🔥</span>
+          <div class="capture-title">NEW BEST SCORE!</div>
+          <div class="new-best-display">
+            <div class="new-best-label">YOUR NEW BEST</div>
+            <div class="new-best-score">${finalScore.toLocaleString()}</div>
+            ${existing ? `<div class="new-best-prev">Previous best: <span>${existing.score.toLocaleString()}</span></div>` : ""}
+          </div>
+          <div class="prize-potential" style="margin-bottom:24px">
+            ${
+              newIsTop20
+                ? `🏆 You're ranked <strong>#${newRank}</strong> — you're in the <strong style="color:var(--amber)">prize zone!</strong>`
+                : `📈 You're ranked <strong>#${newRank}</strong>. Keep playing to climb higher!`
+            }
+          </div>
+          <button class="btn-primary" onclick="viewLeaderboard()">View Leaderboard</button>
+          <button class="btn-secondary" onclick="restartGame()">Play Again</button>
+        `;
+      }
+      return;
+    }
+
     const prizeHtml =
       currentMode === "tournament"
         ? `
@@ -848,20 +911,25 @@ function renderResultCard() {
       </div>`
         : "";
 
-    const ctaHtml =
-      currentMode === "tournament"
-        ? `
-      <button class="btn-primary" onclick="captureStage='form';renderResultCard()">
-        Save Score
-      </button>
-      <button class="btn-secondary" onclick="restartGame()">Play Again</button>
-    `
-        : `
-      <button class="btn-primary" onclick="captureStage='form';renderResultCard()">
-        Share Your Feedback
-      </button>
-      <button class="btn-secondary" onclick="closeOverlay()">Play Again</button>
-    `;
+    let ctaHtml;
+    if (currentMode === "tournament") {
+      if (isReturning) {
+        ctaHtml = `
+          <button class="btn-primary" onclick="viewLeaderboard()">View Leaderboard</button>
+          <button class="btn-secondary" onclick="restartGame()">Play Again</button>
+        `;
+      } else {
+        ctaHtml = `
+          <button class="btn-primary" onclick="captureStage='form';renderResultCard()">Save Score</button>
+          <button class="btn-secondary" onclick="restartGame()">Play Again</button>
+        `;
+      }
+    } else {
+      ctaHtml = `
+        <button class="btn-primary" onclick="captureStage='form';renderResultCard()">Share Your Feedback</button>
+        <button class="btn-secondary" onclick="closeOverlay()">Play Again</button>
+      `;
+    }
 
     document.getElementById("result-card").innerHTML = `
       <span class="result-emoji">${currentMode === "tournament" ? "🏆" : "🎮"}</span>
@@ -890,10 +958,17 @@ function renderTournamentForm() {
     document.getElementById("result-card").innerHTML = `
       <span class="result-emoji">📊</span>
       <div class="capture-title">BEAT YOUR BEST SCORE</div>
-      <p class="result-subtitle" style="margin-bottom:24px">
-        Your best score for this game is <strong style="color:var(--amber)">${existing.score.toLocaleString()}</strong>. Keep playing to beat it!<br>
-    
-      </p>
+      <div class="score-compare">
+        <div class="score-compare-col score-compare-dim">
+          <div class="score-compare-label">YOUR SCORE</div>
+          <div class="score-compare-value">${finalScore.toLocaleString()}</div>
+        </div>
+        <div class="score-compare-divider">VS</div>
+        <div class="score-compare-col">
+          <div class="score-compare-label">BEST SCORE</div>
+          <div class="score-compare-value" style="color:var(--amber)">${existing.score.toLocaleString()}</div>
+        </div>
+      </div>
       <button class="btn-primary" onclick="restartGame()">Play Again</button>
       <button class="btn-secondary" onclick="viewLeaderboard()">View Leaderboard</button>
     `;
@@ -922,6 +997,56 @@ function renderTournamentForm() {
 
   // If same browser has submitted before (even for a different game), skip the form
   const alreadyKnown = !!submittedEmail || !!profile?.email;
+
+  if (alreadyKnown) {
+    if (existing && existing.score >= finalScore) {
+      // Score is not better — show "Beat Your Best" modal
+      document.getElementById("result-card").innerHTML = `
+        <span class="result-emoji">📊</span>
+        <div class="capture-title">BEAT YOUR BEST SCORE</div>
+        <div class="score-compare">
+          <div class="score-compare-col score-compare-dim">
+            <div class="score-compare-label">YOUR SCORE</div>
+            <div class="score-compare-value">${finalScore.toLocaleString()}</div>
+          </div>
+          <div class="score-compare-divider">VS</div>
+          <div class="score-compare-col">
+            <div class="score-compare-label">BEST SCORE</div>
+            <div class="score-compare-value" style="color:var(--amber)">${existing.score.toLocaleString()}</div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="restartGame()">Play Again</button>
+        <button class="btn-secondary" onclick="viewLeaderboard()">View Leaderboard</button>
+      `;
+    } else {
+      // New best score — auto-submit then show new best modal
+      submitScore();
+      const rank =
+        leaderboard.filter(
+          (e) => e.game === currentGame && e.score > finalScore,
+        ).length + 1;
+      const isTop20 = rank <= 20;
+      document.getElementById("result-card").innerHTML = `
+        <span class="result-emoji">🔥</span>
+        <div class="capture-title">NEW BEST SCORE!</div>
+        <div class="new-best-display">
+          <div class="new-best-label">YOUR NEW BEST</div>
+          <div class="new-best-score">${finalScore.toLocaleString()}</div>
+          ${existing ? `<div class="new-best-prev">Previous best: <span>${existing.score.toLocaleString()}</span></div>` : ""}
+        </div>
+        <div class="prize-potential" style="margin-bottom:24px">
+          ${
+            isTop20
+              ? `🏆 You're ranked <strong>#${rank}</strong> — you're in the <strong style="color:var(--amber)">prize zone!</strong>`
+              : `📈 You're ranked <strong>#${rank}</strong>. Keep playing to climb higher!`
+          }
+        </div>
+        <button class="btn-primary" onclick="viewLeaderboard()">View Leaderboard</button>
+        <button class="btn-secondary" onclick="restartGame()">Play Again</button>
+      `;
+    }
+    return;
+  }
 
   document.getElementById("result-card").innerHTML = `
     <span class="result-emoji">🏆</span>
@@ -956,7 +1081,7 @@ function renderTournamentForm() {
       <input type="email" id="f-email" placeholder="Enter your work email" value="${profile?.email || submittedEmail || ""}">
     </div>
     `
-        : `<p class="capture-sub" style="color:var(--green)">✓ Your details are saved. We'll update your score on the leaderboard.</p>`
+        : ``
     }
     <button class="btn-primary" onclick="submitScore()">Save My Score</button>
     <button class="btn-secondary" onclick="captureStage='result';renderResultCard()">Back</button>
@@ -977,12 +1102,11 @@ function feedbackStep1HTML(onNext, onBack) {
       </div>
     </div>
     <div class="form-field">
-      <label>Would you play for real prizes?</label>
+      <label>Would you fund your wallet to play for real money?</label>
       <select id="f-intent">
         <option value="">Select an option...</option>
-        <option>Definitely, I'm ready!</option>
-        <option>Yes, if the stakes are right</option>
-        <option>Maybe, need to think about it</option>
+        <option>Definitely!</option>
+        <option>Maybe, need to think more about it</option>
         <option>Not really interested</option>
       </select>
     </div>
@@ -1309,8 +1433,6 @@ function submitScore() {
     profileId: profile.id,
   });
 
-  incrementGameplayCount(currentGame);
-  updateGameplayCountUI();
   captureStage = "success";
   renderResultCard();
 }
@@ -1473,12 +1595,68 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove("show"), 3000);
 }
 
+// ---- Live player counts ----
+const PLAYER_DEFAULTS = { sugarrush: 20, soloshooter: 32, railwayrun: 16 };
+const PLAYER_KEY = "player_counts";
+const PLAYER_RESET_KEY = "player_counts_reset_date";
+
+function getTodayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
+function getPlayerCounts() {
+  const today = getTodayStr();
+  const lastReset = localStorage.getItem(PLAYER_RESET_KEY);
+  // Reset at 6am daily — check if we've passed 6am today and haven't reset yet
+  const now = new Date();
+  const past6am = now.getHours() >= 6;
+  if (lastReset !== today && past6am) {
+    localStorage.setItem(PLAYER_KEY, JSON.stringify({ ...PLAYER_DEFAULTS }));
+    localStorage.setItem(PLAYER_RESET_KEY, today);
+  }
+  try {
+    return (
+      JSON.parse(localStorage.getItem(PLAYER_KEY)) || { ...PLAYER_DEFAULTS }
+    );
+  } catch {
+    return { ...PLAYER_DEFAULTS };
+  }
+}
+
+function savePlayerCounts(counts) {
+  localStorage.setItem(PLAYER_KEY, JSON.stringify(counts));
+}
+
+function updatePlayerCountUI() {
+  const counts = getPlayerCounts();
+  Object.keys(counts).forEach((game) => {
+    const el = document.getElementById("players-" + game);
+    if (el) el.textContent = counts[game];
+  });
+}
+
+function tickPlayerCounts() {
+  const counts = getPlayerCounts();
+  Object.keys(counts).forEach((game) => {
+    counts[game] += 2;
+  });
+  savePlayerCounts(counts);
+  updatePlayerCountUI();
+  // Also update game-select if open
+  const el = document.getElementById("select-players-count");
+  if (el && currentGame) el.textContent = counts[currentGame] ?? 0;
+}
+
+// Update UI immediately, then increment every 10 minutes
+updatePlayerCountUI();
+setInterval(tickPlayerCounts, 10 * 60 * 1000);
+
 // Init
 let homeLBFilter = "sugarrush";
 renderLeaderboard();
 renderHomeLeaderboard();
 updateWalletUI();
-updateGameplayCountUI();
 
 function filterHomeLB(game, btn) {
   homeLBFilter = game;

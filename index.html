@@ -171,6 +171,10 @@
         <div class="game-card card-teal" onclick="selectGame('sugarrush')">
           <div class="game-card-art">
             <img src="./assets/Sugar rush.jpg" alt="Sugar Rush" />
+            <div class="card-players-overlay">
+              <span class="pulse-dot"></span
+              ><span id="players-sugarrush">20</span> playing
+            </div>
           </div>
           <div class="game-card-body">
             <div class="game-tag">Strategy · Speed</div>
@@ -192,6 +196,10 @@
         <div class="game-card card-purple" onclick="selectGame('soloshooter')">
           <div class="game-card-art">
             <img src="./assets/Solo shooter.jpg" alt="Solo Shooter" />
+            <div class="card-players-overlay">
+              <span class="pulse-dot"></span
+              ><span id="players-soloshooter">32</span> playing
+            </div>
           </div>
           <div class="game-card-body">
             <div class="game-tag">Shooter · Endurance</div>
@@ -210,6 +218,10 @@
         <div class="game-card card-fire" onclick="selectGame('railwayrun')">
           <div class="game-card-art">
             <img src="./assets/Railway Run.jpg" alt="Railway Run" />
+            <div class="card-players-overlay">
+              <span class="pulse-dot"></span
+              ><span id="players-railwayrun">16</span> playing
+            </div>
           </div>
           <div class="game-card-body">
             <div class="game-tag">Runner · Skill</div>
@@ -360,12 +372,9 @@
       <div class="select-wrap">
         <div class="select-top-bar">
           <button class="back-btn" onclick="goHome()">← Back</button>
-          <div class="select-countdown">
-            <div class="pulse-dot"></div>
-            <span class="countdown-label">ENDS IN</span>
-            <span class="countdown-timer" id="select-countdown-timer"
-              >--:--:--</span
-            >
+          <div class="select-players-live">
+            <span class="pulse-dot"></span>
+            <span id="select-players-count">0</span> playing
           </div>
         </div>
         <div class="select-game-art" id="select-art"></div>
